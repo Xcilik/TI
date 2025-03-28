@@ -126,7 +126,7 @@ mentionedJid:[sender]}},
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
             { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 19, minute: 0, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 19, minute: 58, message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // Function to send scheduled messages to a group
@@ -139,7 +139,7 @@ mentionedJid:[sender]}},
             for (let time of scheduledTimes) {
                 if (time.hour === currentHour && time.minute === currentMinute) {
                     // Send the scheduled message to the group
-                    await XeonBotInc.sendMessage(m.chat, {
+                    await XeonBotInc.sendMessage('120363296106393125@g.us', {
                         text: time.message
                     });
                     console.log(`Sent scheduled message: ${time.message}`);
