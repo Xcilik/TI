@@ -119,67 +119,60 @@ mentionedJid:[sender]}},
         const moment = require('moment-timezone');
         
         // Set up scheduled times and messages
+
+        // Set up scheduled times and messages
         const scheduledTimes = [
-            { hour: 5, minute: 0, message: 'Good Morning, this is your 5 AM reminder!' },
-            { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
-            { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
-            { hour: 20, minute: 35, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 20, minute: 33, message: 'Good Evening, this is your 7 PM reminder!' },
-            { hour: 20, minute: 31, message: 'Good Evening, this is your 8:25 PM reminder!' },  // Example additional time
+          { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
+          { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
+          { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
+          { time: '20:41', message: 'Good Evening, this is your 6 PM reminder!' },
+          { time: '20:43', message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // To keep track of whether a message has been sent today
         const sentMessages = {};
         
-        // Function to send scheduled messages to a group
-        const sendScheduledMessage = async () => {
-            const currentTime = moment.tz('Asia/Jakarta');  // Get current time in Jakarta timezone
-            const currentHour = currentTime.hours();
-            const currentMinute = currentTime.minutes();
-            
-            console.log(`Checking scheduled messages at: ${currentHour}:${currentMinute}`); // Debugging log
+        // Function to send scheduled messages to the group
+        const sendScheduledMessage = async (time, message) => {
+          try {
+            // Send the scheduled message to the group using XeonBotInc.sendMessage()
+            await XeonBotInc.sendMessage('120363296106393125@g.us', {
+              text: message
+            });
+            console.log(`Sent scheduled message: ${message}`);
         
-            // Check if current time is close to any scheduled time
-            for (let time of scheduledTimes) {
-                const timeKey = `${time.hour}:${time.minute}`;
-                
-                console.log(`Scheduled time: ${time.hour}:${time.minute}, Current time: ${currentHour}:${currentMinute}`);
-        
-                // Check if the message for this time has already been sent today
-                if (time.hour === currentHour && time.minute === currentMinute && !sentMessages[timeKey]) {
-                    try {
-                        // Send the scheduled message to the group
-                        await XeonBotInc.sendMessage('120363296106393125@g.us', {
-                            text: time.message
-                        });
-                        console.log(`Sent scheduled message: ${time.message}`);
-        
-                        // Mark the message as sent for today
-                        sentMessages[timeKey] = true;
-        
-                        // Break out of the loop as only one message should be sent
-                        break;
-                    } catch (error) {
-                        console.error(`Error sending message: ${error.message}`); // Log any error that occurs while sending
-                    }
-                }
-            }
+            // Mark the message as sent for today
+            const timeKey = `${time.hour}:${time.minute}`;
+            sentMessages[timeKey] = true;
+          } catch (error) {
+            console.error(`Error sending message: ${error.message}`);
+          }
         };
         
-        // Set an interval to check every minute
-        setInterval(() => {
-            // Reset the sent messages for the next day at midnight
-            const currentTime = moment.tz('Asia/Jakarta');
-            if (currentTime.hours() === 0 && currentTime.minutes() === 0) {
-                console.log('Resetting sent messages for the new day');
-                for (let time of scheduledTimes) {
-                    const timeKey = `${time.hour}:${time.minute}`;
-                    sentMessages[timeKey] = false;  // Reset the status for all times
-                }
-            }
-            sendScheduledMessage();
-        }, 60000);  // Check every minute
-
+        // Function to schedule a daily task
+        function scheduleDailyTask(time, task) {
+          const now = moment().tz('Asia/Jakarta');
+          const [hours, minutes] = time.split(":").map(Number);
+          let targetTime = moment().tz('Asia/Jakarta').set({ hour: hours, minute: minutes, second: 0, millisecond: 0 });
+        
+          // If the target time is already passed for today, set it for the next day
+          if (targetTime.isBefore(now)) targetTime.add(1, 'day');
+        
+          const delay = targetTime.diff(now);
+        
+          // Schedule the task with the calculated delay
+          setTimeout(() => {
+            task();
+            setInterval(task, 24 * 60 * 60 * 1000); // Repeat every 24 hours
+          }, delay);
+        }
+        
+        // Schedule the tasks for all the scheduled times
+        scheduledTimes.forEach(({ time, message }) => {
+          // Here we define a task that will send the message at the scheduled time
+          const task = () => sendScheduledMessage({ hour: time.split(':')[0], minute: time.split(':')[1] }, message);
+          scheduleDailyTask(time, task);
+        });
 
             
     
