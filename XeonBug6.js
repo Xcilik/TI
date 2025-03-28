@@ -163,7 +163,23 @@ mentionedJid:[sender]}},
                 replygcxeon(`Photo/Video?`)
                 }
                 }
-                break                        
+                break
+            case 'smeme': {
+                let respond = `Send/Reply image/sticker with caption ${prefix + command} text1|text2`
+                if (!/image/.test(mime)) return replygcxeon(respond)
+                if (!text) return replygcxeon(respond)
+                replygcxeon(mess.wait)
+                atas = text.split('|')[0] ? text.split('|')[0] : '-'
+                bawah = text.split('|')[1] ? text.split('|')[1] : '-'
+                let dwnld = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                let fatGans = await TelegraPh(dwnld)
+                let smeme = `https://api.memegen.link/images/custom/${encodeURIComponent(bawah)}/${encodeURIComponent(atas)}.png?background=${fatGans}`
+                let pop = await XeonBotInc.sendImageAsSticker(m.chat, smeme, m, {
+                    packname: packname,
+                    author: author
+                })
+                fs.unlinkSync(pop)
+            }                        
             case 'sticker':
             case 'stiker':
             case 's': {
