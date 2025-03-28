@@ -117,6 +117,40 @@ mentionedJid:[sender]}},
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
 
+
+        const moment = require('moment-timezone');
+        
+        // Set up scheduled times and messages
+        const scheduledTimes = [
+            { hour: 5, minute: 0, message: 'Good Morning, this is your 5 AM reminder!' },
+            { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
+            { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
+            { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
+            { hour: 19, minute: 0, message: 'Good Evening, this is your 7 PM reminder!' },
+        ];
+        
+        // Function to send scheduled messages to a group
+        const sendScheduledMessage = async () => {
+            const currentTime = moment.tz('Asia/Jakarta');  // Get current time in Jakarta timezone
+            const currentHour = currentTime.hours();
+            const currentMinute = currentTime.minutes();
+        
+            // Check if current time matches any scheduled time
+            for (let time of scheduledTimes) {
+                if (time.hour === currentHour && time.minute === currentMinute) {
+                    // Send the scheduled message to the group
+                    await XeonBotInc.sendMessage(m.chat, {
+                        text: time.message
+                    });
+                    console.log(`Sent scheduled message: ${time.message}`);
+                    break;
+                }
+            }
+        };
+        
+        // Set an interval to check every minute
+        setInterval(sendScheduledMessage, 60000);  // Check every minute
+            
     
         switch (command) {
             case 'kick':
