@@ -179,7 +179,7 @@ mentionedJid:[sender]}},
  
                 *Message : ${q ? q : 'blank'}*\n\n`
                 for (let mem of participants) {
-                    teks += `â€¢ @${mem.id.split('@')[0]}\n`
+                    teks += `@${mem.id.split('@')[0]}\n`
                 }
                 XeonBotInc.sendMessage(m.chat, {
                     text: teks,
