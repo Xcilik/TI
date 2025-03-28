@@ -339,14 +339,14 @@ mentionedJid:[sender]}},
 
             }
             break                        
-            case 'sticker':
+            case 'tikel':
             case 'stiker':
             case 's': {
                 if (!quoted) return replygcxeon(`Reply to Video/Image With Caption ${prefix + command}`)
                 if (/image/.test(mime)) {
                     let media = await quoted.download()
                     let encmedia = await XeonBotInc.sendImageAsSticker(m.chat, media, m, {
-                        packname: packnane,
+                        packname: packname,
                         author: author
                     })
                     await fs.unlinkSync(encmedia)
