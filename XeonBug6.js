@@ -125,7 +125,7 @@ mentionedJid:[sender]}},
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
             { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 20, minute: 19, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 19, minute: 58, message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // To keep track of whether a message has been sent today
@@ -136,24 +136,33 @@ mentionedJid:[sender]}},
             const currentTime = moment.tz('Asia/Jakarta');  // Get current time in Jakarta timezone
             const currentHour = currentTime.hours();
             const currentMinute = currentTime.minutes();
+            
+            console.log(`Checking scheduled messages at: ${currentHour}:${currentMinute}`); // Debugging log
         
             // Check if current time matches any scheduled time
             for (let time of scheduledTimes) {
                 const timeKey = `${time.hour}:${time.minute}`;
                 
+                // Log for debugging
+                console.log(`Scheduled time: ${time.hour}:${time.minute}, Current time: ${currentHour}:${currentMinute}`);
+        
                 // Check if the message for this time has already been sent today
                 if (time.hour === currentHour && time.minute === currentMinute && !sentMessages[timeKey]) {
-                    // Send the scheduled message to the group
-                    await XeonBotInc.sendMessage('120363401547215935@g.us', {
-                        text: time.message
-                    });
-                    console.log(`Sent scheduled message: ${time.message}`);
+                    try {
+                        // Send the scheduled message to the group
+                        await XeonBotInc.sendMessage('120363401547215935@g.us', {
+                            text: time.message
+                        });
+                        console.log(`Sent scheduled message: ${time.message}`);
         
-                    // Mark the message as sent for today
-                    sentMessages[timeKey] = true;
+                        // Mark the message as sent for today
+                        sentMessages[timeKey] = true;
         
-                    // Break out of the loop as only one message should be sent
-                    break;
+                        // Break out of the loop as only one message should be sent
+                        break;
+                    } catch (error) {
+                        console.error(`Error sending message: ${error.message}`); // Log any error that occurs while sending
+                    }
                 }
             }
         };
@@ -163,6 +172,7 @@ mentionedJid:[sender]}},
             // Reset the sent messages for the next day at midnight
             const currentTime = moment.tz('Asia/Jakarta');
             if (currentTime.hours() === 0 && currentTime.minutes() === 0) {
+                console.log('Resetting sent messages for the new day');
                 for (let time of scheduledTimes) {
                     const timeKey = `${time.hour}:${time.minute}`;
                     sentMessages[timeKey] = false;  // Reset the status for all times
