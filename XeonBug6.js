@@ -164,22 +164,125 @@ mentionedJid:[sender]}},
                 }
                 }
                 break
-            case 'smeme': {
-                let respond = `Send/Reply image/sticker with caption ${prefix + command} text1|text2`
-                if (!/image/.test(mime)) return replygcxeon(respond)
-                if (!text) return replygcxeon(respond)
+            case 'toimage':
+            case 'toimg': {
+                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
                 replygcxeon(mess.wait)
-                atas = text.split('|')[0] ? text.split('|')[0] : '-'
-                bawah = text.split('|')[1] ? text.split('|')[1] : '-'
-                let dwnld = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
-                let fatGans = await TelegraPh(dwnld)
-                let smeme = `https://api.memegen.link/images/custom/${encodeURIComponent(bawah)}/${encodeURIComponent(atas)}.png?background=${fatGans}`
-                let pop = await XeonBotInc.sendImageAsSticker(m.chat, smeme, m, {
-                    packname: packname,
-                    author: author
+                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                let ran = await getRandom('.png')
+                exec(`ffmpeg -i ${media} ${ran}`, (err) => {
+                    fs.unlinkSync(media)
+                    if (err) return err
+                    let buffer = fs.readFileSync(ran)
+                    XeonBotInc.sendMessage(m.chat, {
+                        image: buffer
+                    }, {
+                        quoted: m
+                    })
+                    fs.unlinkSync(ran)
                 })
-                fs.unlinkSync(pop)
-            }                        
+
+            }
+            break
+            case 'tomp4':
+            case 'tovideo': {
+                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                let webpToMp4 = await webp2mp4File(media)
+                await XeonBotInc.sendMessage(m.chat, {
+                    video: {
+                        url: webpToMp4.result,
+                        caption: 'Convert Webp To Video'
+                    }
+                }, {
+                    quoted: m
+                })
+                await fs.unlinkSync(media)
+
+            }
+            break
+            case 'toaud':
+            case 'toaudio': {
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Send/Reply Video/Audio that you want to make into audio with caption ${prefix + command}`)
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadMediaMessage(qmsg)
+                let audio = await toAudio(media, 'mp4')
+                XeonBotInc.sendMessage(m.chat, {
+                    audio: audio,
+                    mimetype: 'audio/mpeg'
+                }, {
+                    quoted: m
+                })
+
+            }
+            break
+            case 'tomp3': {
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Send/Reply Video/Audio that you want to make into MP3 with caption ${prefix + command}`)
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadMediaMessage(qmsg)
+                let audio = await toAudio(media, 'mp4')
+                XeonBotInc.sendMessage(m.chat, {
+                    document: audio,
+                    mimetype: 'audio/mp3',
+                    fileName: `dgxeon.mp3`
+                }, {
+                    quoted: m
+                })
+
+            }
+            break
+            case 'tovn':
+            case 'toptt': {
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Reply Video/Audio that you want to make into a VN with caption ${prefix + command}`)
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadMediaMessage(qmsg)
+                let {
+                    toPTT
+                } = require('./lib/converter')
+                let audio = await toPTT(media, 'mp4')
+                XeonBotInc.sendMessage(m.chat, {
+                    audio: audio,
+                    mimetype: 'audio/mpeg',
+                    ptt: true
+                }, {
+                    quoted: m
+                })
+
+            }
+            break
+            case 'togif': {
+                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                let webpToMp4 = await webp2mp4File(media)
+                await XeonBotInc.sendMessage(m.chat, {
+                    video: {
+                        url: webpToMp4.result,
+                        caption: 'Convert Webp To Video'
+                    },
+                    gifPlayback: true
+                }, {
+                    quoted: m
+                })
+                await fs.unlinkSync(media)
+
+            }
+            break
+            case 'tourl': {
+                replygcxeon(mess.wait)
+                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                if (/image/.test(mime)) {
+                    let anu = await TelegraPh(media)
+                    replygcxeon(util.format(anu))
+                } else if (!/image/.test(mime)) {
+                    let anu = await UploadFileUgu(media)
+                    replygcxeon(util.format(anu))
+                }
+                await fs.unlinkSync(media)
+
+            }
+            break                        
             case 'sticker':
             case 'stiker':
             case 's': {
