@@ -8,23 +8,23 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 //contact details
-global.ownernomer = "6285816318783"
-global.ownername = "HACKER BUG VVIP"
+global.ownernomer = "6285174480423"
+global.ownername = "Ti Bot"
 global.ytname = "YT: PANGLIMA JATIM"
 global.socialm = "Instagram : _slmn310"
 global.location = "Indonesia, East Java, Jombang"
 
 global.ownernumber = '6285816318783'  //creator number
-global.ownername = 'HACKER BUG VIP' //owner name
-global.botname = 'HACKER BUG VIP' //name of the bot
+global.ownername = 'Ti Bot' //owner name
+global.botname = 'Ti Bot' //name of the bot
 
 //sticker details
 global.packname = 'Sticker By'
-global.author = 'HACKER BUG VIP\n\nContact: HACKER BUG VIP'
+global.author = 'Ti Bot'
 
 //console view/theme
 global.themeemoji = '🪀'
-global.wm = "Akmal Bot Inc."
+global.wm = "Ti Bot Inc."
 
 //theme link
 global.link = 'https://whatsapp.com/channel/0029VaG9VfPKWEKk1rxTQD20'
