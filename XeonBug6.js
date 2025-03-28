@@ -346,16 +346,16 @@ mentionedJid:[sender]}},
                 if (/image/.test(mime)) {
                     let media = await quoted.download()
                     let encmedia = await XeonBotInc.sendImageAsSticker(m.chat, media, m, {
-                        packname: 'Stiker Ti',
-                        author: 'Ti Bot'
+                        packname: packnane,
+                        author: author
                     })
                     await fs.unlinkSync(encmedia)
                 } else if (isVideo || /video/.test(mime)) {
                     if ((quoted.msg || quoted).seconds > 11) return replygcxeon('Maximum 10 seconds!')
                     let media = await quoted.download()
                     let encmedia = await XeonBotInc.sendVideoAsSticker(m.chat, media, m, {
-                        packname: 'Stiker Ti',
-                        author: 'Ti Bot'
+                        packname: packname,
+                        author: author
                     })
                     await fs.unlinkSync(encmedia)
                 } else {
