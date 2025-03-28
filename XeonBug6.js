@@ -119,51 +119,6 @@ mentionedJid:[sender]}},
 
     
         switch (command) {
-            case 'addprem':
-                if (!isCreator) return replygcxeon(mess.owner)
-                if (args.length < 2)
-                    return replygcxeon(`Use :\n*#addprem* @tag time\n*#addprem* number time\n\nExample : #addprem @tag 30d`);
-                if (m.mentionedJid.length !== 0) {
-                    for (let i = 0; i < m.mentionedJid.length; i++) {
-                        addPremiumUser(m.mentionedJid[0], args[1], premium);
-                    }
-                    replygcxeon("Premium Success")
-                } else {
-                    addPremiumUser(args[0] + "@s.whatsapp.net", args[1], premium);
-                    replygcxeon("Success")
-                }
-                break
-            case 'delprem':
-                if (!isCreator) return replygcxeon(mess.owner)
-                if (args.length < 1) return replygcxeon(`Use :\n*#delprem* @tag\n*#delprem* number`);
-                if (m.mentionedJid.length !== 0) {
-                    for (let i = 0; i < m.mentionedJid.length; i++) {
-                        premium.splice(getPremiumPosition(m.mentionedJid[i], premium), 1);
-                        fs.writeFileSync("./database/premium.json", JSON.stringify(premium));
-                    }
-                    replygcxeon("Delete success")
-                } else {
-                    premium.splice(getPremiumPosition(args[0] + "@s.whatsapp.net", premium), 1);
-                    fs.writeFileSync("./database/premium.json", JSON.stringify(premium));
-                    replygcxeon("Success")
-                }
-                break
-            case 'listprem': {
-                if (!isCreator) return replygcxeon(mess.owner)
-                let data = require("./database/premium.json")
-                let txt = `*------ã€Œ LIST PREMIUM ã€------*\n\n`
-                for (let i of data) {
-                    txt += `Number : ${i.id}\n`
-                    txt += `Expired : ${i.expired} Second\n`         
-                }                
-                XeonBotInc.sendMessage(m.chat, {
-                    text: txt,
-                    mentions: i
-                }, {
-                    quoted: m
-                })
-            }
-            break
             case 'kick':
                 if (!m.isGroup) return replygcxeon(mess.group)
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
@@ -171,6 +126,7 @@ mentionedJid:[sender]}},
                 let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
                 break
+            case 'all':                        
             case 'tagall':
                 if (!m.isGroup) return replygcxeon(mess.group)
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
@@ -188,27 +144,26 @@ mentionedJid:[sender]}},
                     quoted: m
                 })
                 break
-            case 'hidetag':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                XeonBotInc.sendMessage(m.chat, {
-                    text: q ? q : '',
-                    mentions: participants.map(a => a.id)
-                }, {
-                    quoted: m
-                })
-                break
-            case 'totag':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (!isAdmins) return replygcxeon(mess.admin)
-                if (!m.quoted) return replygcxeon(`Reply messages with captions ${prefix + command}`)
-                XeonBotInc.sendMessage(m.chat, {
-                    forward: m.quoted.fakeObj,
-                    mentions: participants.map(a => a.id)
-                })
-                break
+            case 'swm': case 'steal': case 'stickerwm': case 'take':{
+                if (!args.join(" ")) return replygcxeon(`Where is the text?`)
+                const swn = args.join(" ")
+                const pcknm = swn.split("|")[0]
+                const atnm = swn.split("|")[1]
+                if (m.quoted.isAnimated === true) {
+                XeonBotInc.downloadAndSaveMediaMessage(quoted, "gifee")
+                XeonBotInc.sendMessage(from, {sticker:fs.readFileSync("gifee.webp")},{quoted:m})
+                } else if (/image/.test(mime)) {
+                let media = await quoted.download()
+                let encmedia = await XeonBotInc.sendImageAsSticker(m.chat, media, m, { packname: pcknm, author: atnm })
+                } else if (/video/.test(mime)) {
+                if ((quoted.msg || quoted).seconds > 11) return replygcxeon('Maximum 10 Seconds!')
+                let media = await quoted.download()
+                let encmedia = await XeonBotInc.sendVideoAsSticker(m.chat, media, m, { packname: pcknm, author: atnm })
+                } else {
+                replygcxeon(`Photo/Video?`)
+                }
+                }
+                break                        
             case 'sticker':
             case 'stiker':
             case 's': {
@@ -233,7 +188,6 @@ mentionedJid:[sender]}},
                 }
             }
             break
-
             case 'ea':
             case 'eak': {
                 if (/image/.test(mime)) {
