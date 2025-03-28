@@ -119,14 +119,12 @@ mentionedJid:[sender]}},
         const moment = require('moment-timezone');
         
         // Set up scheduled times and messages
-
-        // Set up scheduled times and messages
         const scheduledTimes = [
           { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
           { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
           { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
-          { time: '20:41', message: 'Good Evening, this is your 6 PM reminder!' },
-          { time: '20:43', message: 'Good Evening, this is your 7 PM reminder!' },
+          { time: '20:50', message: 'Good Evening, this is your 6 PM reminder!' },
+          { time: '21:00', message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // To keep track of whether a message has been sent today
@@ -136,7 +134,7 @@ mentionedJid:[sender]}},
         const sendScheduledMessage = async (time, message) => {
           try {
             // Send the scheduled message to the group using XeonBotInc.sendMessage()
-            await XeonBotInc.sendMessage('120363296106393125@g.us', {
+            await XeonBotInc.sendMessage('120363401547215935@g.us', {
               text: message
             });
             console.log(`Sent scheduled message: ${message}`);
@@ -163,7 +161,6 @@ mentionedJid:[sender]}},
           // Schedule the task with the calculated delay
           setTimeout(() => {
             task();
-            setInterval(task, 24 * 60 * 60 * 1000); // Repeat every 24 hours
           }, delay);
         }
         
@@ -173,6 +170,7 @@ mentionedJid:[sender]}},
           const task = () => sendScheduledMessage({ hour: time.split(':')[0], minute: time.split(':')[1] }, message);
           scheduleDailyTask(time, task);
         });
+
 
             
     
