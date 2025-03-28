@@ -225,7 +225,7 @@ mentionedJid:[sender]}},
                 XeonBotInc.sendMessage(m.chat, {
                     document: audio,
                     mimetype: 'audio/mp3',
-                    fileName: `dgxeon.mp3`
+                    fileName: `ti.mp3`
                 }, {
                     quoted: m
                 })
