@@ -116,8 +116,7 @@ mentionedJid:[sender]}},
             console.log(chalk.green(`Private Chat:`))
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
-
-
+        
         const moment = require('moment-timezone');
         
         // Set up scheduled times and messages
@@ -126,23 +125,34 @@ mentionedJid:[sender]}},
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
             { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 19, minute: 58, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 20, minute: 11, message: 'Good Evening, this is your 7 PM reminder!' },
         ];
+        
+        // To store the last sent time for each scheduled message
+        let lastSentTime = {};
         
         // Function to send scheduled messages to a group
         const sendScheduledMessage = async () => {
             const currentTime = moment.tz('Asia/Jakarta');  // Get current time in Jakarta timezone
             const currentHour = currentTime.hours();
             const currentMinute = currentTime.minutes();
+            const currentKey = `${currentHour}:${currentMinute}`;
         
             // Check if current time matches any scheduled time
             for (let time of scheduledTimes) {
-                if (time.hour === currentHour && time.minute === currentMinute) {
-                    // Send the scheduled message to the group
-                    await XeonBotInc.sendMessage('120363296106393125@g.us', {
-                        text: time.message
-                    });
-                    console.log(`Sent scheduled message: ${time.message}`);
+                const scheduledKey = `${time.hour}:${time.minute}`;
+                if (currentKey === scheduledKey) {
+                    // Check if the message for this time has been sent already
+                    if (lastSentTime[scheduledKey] !== currentTime.format('YYYY-MM-DD')) {
+                        // Send the scheduled message to the group
+                        await XeonBotInc.sendMessage('120363296106393125@g.us', {
+                            text: time.message
+                        });
+                        console.log(`Sent scheduled message: ${time.message}`);
+        
+                        // Update the last sent time for this scheduled message
+                        lastSentTime[scheduledKey] = currentTime.format('YYYY-MM-DD');
+                    }
                     break;
                 }
             }
@@ -150,6 +160,7 @@ mentionedJid:[sender]}},
         
         // Set an interval to check every minute
         setInterval(sendScheduledMessage, 60000);  // Check every minute
+
             
     
         switch (command) {
