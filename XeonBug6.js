@@ -175,9 +175,9 @@ mentionedJid:[sender]}},
                 if (!m.isGroup) return replygcxeon(mess.group)
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
                 if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                let teks = `*ðŸ‘¥ Tag All*
+                let teks = `*Tag All*
  
-                 ðŸ—žï¸ *Message : ${q ? q : 'blank'}*\n\n`
+                *Message : ${q ? q : 'blank'}*\n\n`
                 for (let mem of participants) {
                     teks += `â€¢ @${mem.id.split('@')[0]}\n`
                 }
