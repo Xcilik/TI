@@ -125,7 +125,7 @@ mentionedJid:[sender]}},
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
             { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 20, minute: 18, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 20, minute: 19, message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // To keep track of whether a message has been sent today
@@ -144,7 +144,7 @@ mentionedJid:[sender]}},
                 // Check if the message for this time has already been sent today
                 if (time.hour === currentHour && time.minute === currentMinute && !sentMessages[timeKey]) {
                     // Send the scheduled message to the group
-                    await XeonBotInc.sendMessage('120363296106393125@g.us', {
+                    await XeonBotInc.sendMessage('120363401547215935@g.us', {
                         text: time.message
                     });
                     console.log(`Sent scheduled message: ${time.message}`);
