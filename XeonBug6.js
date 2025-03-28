@@ -124,8 +124,8 @@ mentionedJid:[sender]}},
             { hour: 5, minute: 0, message: 'Good Morning, this is your 5 AM reminder!' },
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
-            { hour: 18, minute: 0, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 19, minute: 58, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 20, minute: 25, message: 'Good Evening, this is your 6 PM reminder!' },
+            { hour: 20, minute: 24, message: 'Good Evening, this is your 7 PM reminder!' },
         ];
         
         // To keep track of whether a message has been sent today
