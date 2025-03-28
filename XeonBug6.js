@@ -116,7 +116,6 @@ mentionedJid:[sender]}},
             console.log(chalk.green(`Private Chat:`))
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
-        
         const moment = require('moment-timezone');
         
         // Set up scheduled times and messages
@@ -124,8 +123,9 @@ mentionedJid:[sender]}},
             { hour: 5, minute: 0, message: 'Good Morning, this is your 5 AM reminder!' },
             { hour: 12, minute: 0, message: 'Good Afternoon, this is your 12 PM reminder!' },
             { hour: 15, minute: 0, message: 'Good Afternoon, this is your 3 PM reminder!' },
-            { hour: 20, minute: 25, message: 'Good Evening, this is your 6 PM reminder!' },
-            { hour: 20, minute: 24, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 20, minute: 35, message: 'Good Evening, this is your 6 PM reminder!' },
+            { hour: 20, minute: 33, message: 'Good Evening, this is your 7 PM reminder!' },
+            { hour: 20, minute: 31, message: 'Good Evening, this is your 8:25 PM reminder!' },  // Example additional time
         ];
         
         // To keep track of whether a message has been sent today
@@ -139,18 +139,17 @@ mentionedJid:[sender]}},
             
             console.log(`Checking scheduled messages at: ${currentHour}:${currentMinute}`); // Debugging log
         
-            // Check if current time matches any scheduled time
+            // Check if current time is close to any scheduled time
             for (let time of scheduledTimes) {
                 const timeKey = `${time.hour}:${time.minute}`;
                 
-                // Log for debugging
                 console.log(`Scheduled time: ${time.hour}:${time.minute}, Current time: ${currentHour}:${currentMinute}`);
         
                 // Check if the message for this time has already been sent today
                 if (time.hour === currentHour && time.minute === currentMinute && !sentMessages[timeKey]) {
                     try {
                         // Send the scheduled message to the group
-                        await XeonBotInc.sendMessage('120363401547215935@g.us', {
+                        await XeonBotInc.sendMessage('120363296106393125@g.us', {
                             text: time.message
                         });
                         console.log(`Sent scheduled message: ${time.message}`);
@@ -180,6 +179,7 @@ mentionedJid:[sender]}},
             }
             sendScheduledMessage();
         }, 60000);  // Check every minute
+
 
             
     
