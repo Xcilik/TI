@@ -123,52 +123,47 @@ mentionedJid:[sender]}},
           { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
           { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
           { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
-          { time: '20:50', message: 'Good Evening, this is your 6 PM reminder!' },
-          { time: '21:00', message: 'Good Evening, this is your 7 PM reminder!' },
+          { time: '18:00', message: 'Good Evening, this is your 6 PM reminder!' },
+          { time: '22:55', message: 'Good Evening, this is your 7 PM reminder!' },
         ];
-        
-        // To keep track of whether a message has been sent today
-        const sentMessages = {};
         
         // Function to send scheduled messages to the group
         const sendScheduledMessage = async (time, message) => {
           try {
-            // Send the scheduled message to the group using XeonBotInc.sendMessage()
             await XeonBotInc.sendMessage('120363401547215935@g.us', {
               text: message
             });
-            console.log(`Sent scheduled message: ${message}`);
-        
-            // Mark the message as sent for today
-            const timeKey = `${time.hour}:${time.minute}`;
-            sentMessages[timeKey] = true;
+            console.log(`Sent scheduled message at ${time}: ${message}`);
           } catch (error) {
             console.error(`Error sending message: ${error.message}`);
           }
         };
         
-        // Function to schedule a daily task
-        function scheduleDailyTask(time, task) {
-          const now = moment().tz('Asia/Jakarta');
-          const [hours, minutes] = time.split(":").map(Number);
-          let targetTime = moment().tz('Asia/Jakarta').set({ hour: hours, minute: minutes, second: 0, millisecond: 0 });
+        // Function to schedule a recurring daily task
+        function scheduleDailyTask(time, message) {
+          function scheduleNext() {
+            const now = moment().tz('Asia/Jakarta');
+            const [hours, minutes] = time.split(":").map(Number);
+            let targetTime = moment().tz('Asia/Jakarta').set({ hour: hours, minute: minutes, second: 0, millisecond: 0 });
         
-          // If the target time is already passed for today, set it for the next day
-          if (targetTime.isBefore(now)) targetTime.add(1, 'day');
+            // If the target time has already passed today, schedule it for tomorrow
+            if (targetTime.isBefore(now)) targetTime.add(1, 'day');
         
-          const delay = targetTime.diff(now);
+            const delay = targetTime.diff(now);
+            console.log(`Scheduling message for ${targetTime.format('YYYY-MM-DD HH:mm:ss')}`);
         
-          // Schedule the task with the calculated delay
-          setTimeout(() => {
-            task();
-          }, delay);
+            setTimeout(() => {
+              sendScheduledMessage(time, message);
+              scheduleNext(); // Re-schedule for the next day
+            }, delay);
+          }
+        
+          scheduleNext();
         }
         
         // Schedule the tasks for all the scheduled times
         scheduledTimes.forEach(({ time, message }) => {
-          // Here we define a task that will send the message at the scheduled time
-          const task = () => sendScheduledMessage({ hour: time.split(':')[0], minute: time.split(':')[1] }, message);
-          scheduleDailyTask(time, task);
+          scheduleDailyTask(time, message);
         });
 
 
