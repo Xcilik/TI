@@ -121,62 +121,6 @@ mentionedJid:[sender]}},
         
         // Set up scheduled times and messages
 
-
-            
-const moment = require('moment-timezone');
-
-// Jadwal pengiriman pesan
-const scheduledTimes = [
-  { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
-  { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
-  { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
-  { time: '18:10', message: 'Good Evening, this is your 6 PM reminder!' },
-  { time: '23:03', message: 'Good Evening, this is your 11:03 PM reminder!' },
-];
-
-// Penyimpanan status pesan yang sudah dikirim hari ini
-const sentMessages = new Set();
-
-function getTimeKey(date, time) {
-  return `${date}-${time}`;
-}
-
-// Fungsi pengiriman pesan
-const sendScheduledMessage = async (time, message) => {
-  try {
-    await XeonBotInc.sendMessage('120363401547215935@g.us', {
-      text: message,
-    });
-    console.log(`Sent scheduled message at ${time}: ${message}`);
-  } catch (error) {
-    console.error(`Error sending message at ${time}: ${error.message}`);
-  }
-};
-
-// Pengecekan setiap detik
-setInterval(() => {
-  const now = moment().tz('Asia/Jakarta');
-  const currentTime = now.format('HH:mm');
-  const currentDate = now.format('YYYY-MM-DD');
-  const timeKey = getTimeKey(currentDate, currentTime);
-
-  // Loop ke semua jadwal
-  for (const { time, message } of scheduledTimes) {
-    if (time === currentTime && !sentMessages.has(timeKey)) {
-      sentMessages.add(timeKey);
-      sendScheduledMessage(time, message);
-    }
-  }
-
-  // Optional: Reset sentMessages setiap jam 00:01
-  if (currentTime === '00:01') {
-    sentMessages.clear();
-    console.log('Reset sent messages for new day');
-  }
-}, 1000);
-
-console.log('Scheduler is running...');
-    
         switch (command) {
             case 'kick':
                 if (!m.isGroup) return replygcxeon(mess.group)
