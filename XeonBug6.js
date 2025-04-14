@@ -201,20 +201,20 @@ mentionedJid:[sender]}},
                 const sticker = qmsg?.message?.stickerMessage || qmsg?.stickerMessage
                 if (sticker) {
                     console.log(chalk.cyan('\n[ STICKER ID LOG ]'))
-                if (sticker.fileSha256) {
-                    console.log(chalk.green(`• SHA256:`), sticker.fileSha256.toString('base64'))
-                }
-                if (sticker.mediaKey) {
-                    console.log(chalk.green(`• MediaKey:`), sticker.mediaKey.toString('base64'))
-                }
-                if (sticker.directPath) {
-                    console.log(chalk.green(`• DirectPath:`), sticker.directPath)
-                }
-                if (sticker.mimetype) {
-                    console.log(chalk.green(`• Mimetype:`), sticker.mimetype)
-                }
-            } else {
-                console.log(chalk.red('[!] Tidak ada stikerMessage terdeteksi dalam qmsg'))
+                    if (sticker.fileSha256) {
+                        console.log(chalk.green(`• SHA256:`), sticker.fileSha256.toString('base64'))
+                    }
+                    if (sticker.mediaKey) {
+                        console.log(chalk.green(`• MediaKey:`), sticker.mediaKey.toString('base64'))
+                    }
+                    if (sticker.directPath) {
+                        console.log(chalk.green(`• DirectPath:`), sticker.directPath)
+                    }
+                    if (sticker.mimetype) {
+                        console.log(chalk.green(`• Mimetype:`), sticker.mimetype)
+                    }
+                } else {
+                    console.log(chalk.red('[!] Tidak ada stikerMessage terdeteksi dalam qmsg'))
                 }
 
     // K
