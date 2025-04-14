@@ -117,56 +117,65 @@ mentionedJid:[sender]}},
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
             
-        const moment = require('moment-timezone');
+        
         
         // Set up scheduled times and messages
 
 
-        const scheduledTimes = [
-          { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
-          { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
-          { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
-          { time: '18:03', message: 'Good Evening, this is your 6 PM reminder!' },
-          { time: '23:03', message: 'Good Evening, this is your 7 PM reminder!' },
-        ];
-
-        const sentMessages = {};
-        let lastCheckedMinute = null;
-
-        const sendScheduledMessage = async (time, message) => {
-          try {
-            await XeonBotInc.sendMessage('120363401547215935@g.us', {
-              text: message
-            });
-            console.log(`Sent scheduled message at ${time}: ${message}`);
-
-            const todayKey = moment().tz('Asia/Jakarta').format('YYYY-MM-DD');
-            sentMessages[`${todayKey}-${time}`] = true;
-          } catch (error) {
-            console.error(`Error sending message: ${error.message}`);
-          }
-        };
-
-        const checkAndSendMessages = () => {
-          const now = moment().tz('Asia/Jakarta');
-          const currentMinute = now.format('YYYY-MM-DD-HH:mm');
-
-          if (currentMinute === lastCheckedMinute) return; // Hindari double send
-          lastCheckedMinute = currentMinute;
-
-          const timeOnly = now.format('HH:mm');
-          const todayKey = now.format('YYYY-MM-DD');
-
-          scheduledTimes.forEach(({ time, message }) => {
-            if (time === timeOnly && !sentMessages[`${todayKey}-${time}`]) {
-              sendScheduledMessage(time, message);
-            }
-          });
-        };
-
-        setInterval(checkAndSendMessages, 1000); // Bisa 1 detik sekali, karena sudah anti spam
-        console.log('Message scheduler is running...');
             
+const moment = require('moment-timezone');
+
+// Jadwal pengiriman pesan
+const scheduledTimes = [
+  { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
+  { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
+  { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
+  { time: '18:10', message: 'Good Evening, this is your 6 PM reminder!' },
+  { time: '23:03', message: 'Good Evening, this is your 11:03 PM reminder!' },
+];
+
+// Penyimpanan status pesan yang sudah dikirim hari ini
+const sentMessages = new Set();
+
+function getTimeKey(date, time) {
+  return `${date}-${time}`;
+}
+
+// Fungsi pengiriman pesan
+const sendScheduledMessage = async (time, message) => {
+  try {
+    await XeonBotInc.sendMessage('120363401547215935@g.us', {
+      text: message,
+    });
+    console.log(`Sent scheduled message at ${time}: ${message}`);
+  } catch (error) {
+    console.error(`Error sending message at ${time}: ${error.message}`);
+  }
+};
+
+// Pengecekan setiap detik
+setInterval(() => {
+  const now = moment().tz('Asia/Jakarta');
+  const currentTime = now.format('HH:mm');
+  const currentDate = now.format('YYYY-MM-DD');
+  const timeKey = getTimeKey(currentDate, currentTime);
+
+  // Loop ke semua jadwal
+  for (const { time, message } of scheduledTimes) {
+    if (time === currentTime && !sentMessages.has(timeKey)) {
+      sentMessages.add(timeKey);
+      sendScheduledMessage(time, message);
+    }
+  }
+
+  // Optional: Reset sentMessages setiap jam 00:01
+  if (currentTime === '00:01') {
+    sentMessages.clear();
+    console.log('Reset sent messages for new day');
+  }
+}, 1000);
+
+console.log('Scheduler is running...');
     
         switch (command) {
             case 'kick':
