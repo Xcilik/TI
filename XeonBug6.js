@@ -145,34 +145,6 @@ mentionedJid:[sender]}},
                     quoted: m
                 })
                 break
-            case 'stikerid':
-            case 'sid':
-
-                const stickerInfo = m.quoted.message.stickerMessage
-                let infoText = '*Sticker ID Info*\n\n'
-
-                if (stickerInfo.fileSha256) {
-                    infoText += `• SHA256: \`${stickerInfo.fileSha256.toString('base64')}\`\n`
-                }
-
-                if (stickerInfo.mediaKey) {
-                    infoText += `• MediaKey: \`${stickerInfo.mediaKey.toString('base64')}\`\n`
-                }
-
-                if (stickerInfo.directPath) {
-                    infoText += `• DirectPath: \`${stickerInfo.directPath}\`\n`
-                }
-
-                if (stickerInfo.mimetype) {
-                    infoText += `• Mimetype: \`${stickerInfo.mimetype}\`\n`
-                }
-
-                XeonBotInc.sendMessage(m.chat, {
-                    text: infoText,
-                }, {
-                    quoted: m
-                })
-                break
                         
             case 'swm': case 'steal': case 'stickerwm': case 'take':{
                 if (!args.join(" ")) return replygcxeon(`Where is the text?`)
@@ -197,28 +169,7 @@ mentionedJid:[sender]}},
             case 'toimage':
             case 'toimg': {
                 if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
-                replygcxeon(mess.wait)
-                const sticker = qmsg?.message?.stickerMessage || qmsg?.stickerMessage
-                if (sticker) {
-                    console.log(chalk.cyan('\n[ STICKER ID LOG ]'))
-                    if (sticker.fileSha256) {
-                        console.log(chalk.green(`• SHA256:`), sticker.fileSha256.toString('base64'))
-                    }
-                    if (sticker.mediaKey) {
-                        console.log(chalk.green(`• MediaKey:`), sticker.mediaKey.toString('base64'))
-                    }
-                    if (sticker.directPath) {
-                        console.log(chalk.green(`• DirectPath:`), sticker.directPath)
-                    }
-                    if (sticker.mimetype) {
-                        console.log(chalk.green(`• Mimetype:`), sticker.mimetype)
-                    }
-                } else {
-                    console.log(chalk.red('[!] Tidak ada stikerMessage terdeteksi dalam qmsg'))
-                }
-
-    // K
-                    
+                replygcxeon(mess.wait)       
                 let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
                 let ran = await getRandom('.png')
                 exec(`ffmpeg -i ${media} ${ran}`, (err) => {
