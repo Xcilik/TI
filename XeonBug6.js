@@ -123,17 +123,15 @@ mentionedJid:[sender]}},
 
         switch (command) {
             case 'kick':
-                if (!m.isGroup) return replygcxeon(mess.group)
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                if (!isBotAdmins) return replygcxeon(mess.botAdmin)                        
+                if (!m.isGroup) return replygcxeon(mess.group)
                 let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
                 break
             case 'all':                        
             case 'tagall':
                 if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
                 let teks = `*Tag All*
  
                 *Message : ${q ? q : 'blank'}*\n\n`
