@@ -116,54 +116,56 @@ mentionedJid:[sender]}},
             console.log(chalk.green(`Private Chat:`))
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
+            
         const moment = require('moment-timezone');
         
         // Set up scheduled times and messages
+
+
         const scheduledTimes = [
           { time: '05:00', message: 'Good Morning, this is your 5 AM reminder!' },
           { time: '12:00', message: 'Good Afternoon, this is your 12 PM reminder!' },
           { time: '15:00', message: 'Good Afternoon, this is your 3 PM reminder!' },
-          { time: '18:00', message: 'Good Evening, this is your 6 PM reminder!' },
+          { time: '18:03', message: 'Good Evening, this is your 6 PM reminder!' },
           { time: '23:03', message: 'Good Evening, this is your 7 PM reminder!' },
         ];
-        
-        // To keep track of whether a message has been sent today
+
         const sentMessages = {};
-        
-        // Function to send a scheduled message
+        let lastCheckedMinute = null;
+
         const sendScheduledMessage = async (time, message) => {
           try {
             await XeonBotInc.sendMessage('120363401547215935@g.us', {
               text: message
             });
             console.log(`Sent scheduled message at ${time}: ${message}`);
-        
-            // Mark this message as sent for today
+
             const todayKey = moment().tz('Asia/Jakarta').format('YYYY-MM-DD');
             sentMessages[`${todayKey}-${time}`] = true;
           } catch (error) {
             console.error(`Error sending message: ${error.message}`);
           }
         };
-        
-        // Function to check and send messages
+
         const checkAndSendMessages = () => {
           const now = moment().tz('Asia/Jakarta');
-          const currentTime = now.format('HH:mm');
+          const currentMinute = now.format('YYYY-MM-DD-HH:mm');
+
+          if (currentMinute === lastCheckedMinute) return; // Hindari double send
+          lastCheckedMinute = currentMinute;
+
+          const timeOnly = now.format('HH:mm');
           const todayKey = now.format('YYYY-MM-DD');
-        
+
           scheduledTimes.forEach(({ time, message }) => {
-            if (time === currentTime && !sentMessages[`${todayKey}-${time}`]) {
+            if (time === timeOnly && !sentMessages[`${todayKey}-${time}`]) {
               sendScheduledMessage(time, message);
             }
           });
         };
-        
-        // Run the check every minute
-        setInterval(checkAndSendMessages, 60000); // Check every 60 seconds
-        
-        console.log('Message scheduler is running...');
 
+        setInterval(checkAndSendMessages, 1000); // Bisa 1 detik sekali, karena sudah anti spam
+        console.log('Message scheduler is running...');
             
     
         switch (command) {
