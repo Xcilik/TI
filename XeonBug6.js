@@ -145,6 +145,38 @@ mentionedJid:[sender]}},
                     quoted: m
                 })
                 break
+            case 'stikerid':
+            case 'sid':
+                if (!m.quoted || !m.quoted.message || !m.quoted.message.stickerMessage) {
+                    return replygcxeon('Reply ke stiker yang ingin kamu ambil ID-nya!')
+                }
+
+                const stickerInfo = m.quoted.message.stickerMessage
+                let infoText = '*Sticker ID Info*\n\n'
+
+                if (stickerInfo.fileSha256) {
+                    infoText += `• SHA256: \`${stickerInfo.fileSha256.toString('base64')}\`\n`
+                }
+
+                if (stickerInfo.mediaKey) {
+                    infoText += `• MediaKey: \`${stickerInfo.mediaKey.toString('base64')}\`\n`
+                }
+
+                if (stickerInfo.directPath) {
+                    infoText += `• DirectPath: \`${stickerInfo.directPath}\`\n`
+                }
+
+                if (stickerInfo.mimetype) {
+                    infoText += `• Mimetype: \`${stickerInfo.mimetype}\`\n`
+                }
+
+                XeonBotInc.sendMessage(m.chat, {
+                    text: infoText,
+                }, {
+                    quoted: m
+                })
+                break
+                        
             case 'swm': case 'steal': case 'stickerwm': case 'take':{
                 if (!args.join(" ")) return replygcxeon(`Where is the text?`)
                 const swn = args.join(" ")
