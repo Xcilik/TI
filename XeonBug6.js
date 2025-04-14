@@ -147,9 +147,6 @@ mentionedJid:[sender]}},
                 break
             case 'stikerid':
             case 'sid':
-                if (!m.quoted || !m.quoted.message || !m.quoted.message.stickerMessage) {
-                    return replygcxeon('Reply ke stiker yang ingin kamu ambil ID-nya!')
-                }
 
                 const stickerInfo = m.quoted.message.stickerMessage
                 let infoText = '*Sticker ID Info*\n\n'
