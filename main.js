@@ -20,6 +20,7 @@ const { default: XeonBotIncConnect, delay, PHONENUMBER_MCC, makeCacheableSignalK
 const NodeCache = require("node-cache")
 const Pino = require("pino")
 const readline = require("readline")
+const startScheduler = require('./lib/schduler') // Pastikan path-nya benar
 const { parsePhoneNumber } = require("libphonenumber-js")
 const makeWASocket = require("@whiskeysockets/baileys").default
 
@@ -174,6 +175,9 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
 			await delay(1999)
             console.log(chalk.cyan(`< ================================================== >`))
 
+       // Panggil scheduler setelah koneksi terbuka
+            startScheduler(XeonBotInc) // 
+		
         }
         if (
             connection === "close" &&
