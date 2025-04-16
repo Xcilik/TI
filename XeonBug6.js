@@ -134,7 +134,7 @@ module.exports = XeonBotInc = async (XeonBotInc, m, msg, chatUpdate, store) => {
         expiredCheck(XeonBotInc, m, premium);
 //group chat msg by xeon
 
-const userSessions = {}
+        const userSessions = {}
 
 const replygcxeon = (teks) => {
 XeonBotInc.sendMessage(m.chat,
@@ -158,7 +158,7 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
-        if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
+        if (userSessions[m.sender]?.collecting && m.mtype == 'imageMessage') {
             console.log("Menerima gambar...");  // Menambahkan log
 
             try {
