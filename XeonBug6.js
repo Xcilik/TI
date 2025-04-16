@@ -181,40 +181,31 @@ mentionedJid:[sender]}},
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
 // Ketika menerima gambar
         if (
-            (m.mtype === 'imageMessage' || m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage) &&
+            m.mtype === 'imageMessage' &&
             userSessions[m.sender] &&
             userSessions[m.sender].collecting
         ) {
+            console.log("Menerima gambar...");
             try {
                 if (!fs.existsSync('./temp')) fs.mkdirSync('./temp');
         
-                const images = m.message.imageMessage 
-                    ? [m.message.imageMessage] 
-                    : m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage 
-                        ? [m.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage]
-                        : [];
-        
-                let count = 0;
-                for (let imageData of images) {
-                    const stream = await downloadContentFromMessage(imageData, 'image');
-                    let buffer = Buffer.from([]);
-                    for await (const chunk of stream) {
-                        buffer = Buffer.concat([buffer, chunk]);
-                    }
-        
-                    const filename = `./temp/${m.sender}_${Date.now()}_${count++}.jpg`;
-                    fs.writeFileSync(filename, buffer);
-                    userSessions[m.sender].images.push(filename);
+                const stream = await downloadContentFromMessage(m.message.imageMessage, 'image');
+                let buffer = Buffer.from([]);
+                for await (const chunk of stream) {
+                    buffer = Buffer.concat([buffer, chunk]);
                 }
         
-                // 🔥 Hanya satu reply untuk semua
-                replygcxeon(`✅ ${count} gambar diterima. Total sekarang: ${userSessions[m.sender].images.length}`);
+                const filename = `./temp/${m.sender}_${Date.now()}.jpg`;
+                fs.writeFileSync(filename, buffer);
+        
+                console.log(`Gambar disimpan di ${filename}`);
+                userSessions[m.sender].images.push(filename);
+                replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
             } catch (e) {
                 console.error(e);
                 replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.');
             }
         }
-
         
         // Jika user mengetik "selesai"
         if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
