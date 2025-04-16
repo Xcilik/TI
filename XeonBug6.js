@@ -26,34 +26,37 @@ const { PDFDocument } = require('pdf-lib')
 const Jimp = require('jimp')
 
 async function createScannedPDF(images, outputPath) {
-    const pdfDoc = await PDFDocument.create()
+    const pdfDoc = await PDFDocument.create();
 
     for (let imgPath of images) {
-        let image = await Jimp.read(imgPath)
+        let image = await Jimp.read(imgPath);
 
-        // Proses seperti CamScanner
+        // Proses gambar seperti di CamScanner
         image
-            .greyscale()
-            .contrast(1)
-            .brightness(0.1)
-            .normalize()
-            .quality(80)
+            .greyscale()       // Mengubah gambar menjadi grayscale
+            .contrast(1)       // Menambah kontras
+            .brightness(0.1)   // Menambah sedikit kecerahan
+            .normalize()       // Normalisasi gambar
+            .quality(80);      // Mengurangi kualitas gambar untuk kompresi
 
-        let processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
-        const pdfImage = await pdfDoc.embedJpg(processedBuffer)
+        let processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+        const pdfImage = await pdfDoc.embedJpg(processedBuffer);
 
-        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height])
+        // Menambahkan halaman dengan ukuran gambar
+        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
         page.drawImage(pdfImage, {
             x: 0,
             y: 0,
             width: pdfImage.width,
             height: pdfImage.height
-        })
+        });
     }
 
-    const pdfBytes = await pdfDoc.save()
-    fs.writeFileSync(outputPath, pdfBytes)
+    // Menyimpan file PDF
+    const pdfBytes = await pdfDoc.save();
+    fs.writeFileSync(outputPath, pdfBytes);
 }
+
 
 
 //bug databas
@@ -156,44 +159,44 @@ mentionedJid:[sender]}},
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
         if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
             try {
-                if (!fs.existsSync('./temp')) fs.mkdirSync('./temp')
+                if (!fs.existsSync('./temp')) fs.mkdirSync('./temp'); // Pastikan folder temp ada
+                
+                let media = await XeonBotInc.downloadMediaMessage(m); // Mendownload media
+                let filename = `./temp/${m.sender}_${Date.now()}.jpg`; // Menyimpan dengan nama unik
+                fs.writeFileSync(filename, media); // Menyimpan file gambar ke folder temp
         
-                let media = await XeonBotInc.downloadMediaMessage(m)
-                let filename = `./temp/${m.sender}_${Date.now()}.jpg`
-                fs.writeFileSync(filename, media)
-        
-                userSessions[m.sender].images.push(filename)
-                replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`)
+                userSessions[m.sender].images.push(filename); // Menambahkan gambar ke sesi pengumpulan
+                replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
             } catch (e) {
-                console.log(e)
-                replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.')
+                console.log(e);
+                replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.');
             }
         }
         
-        // Proses PDF saat user ketik 'selesai'
+        // Proses PDF saat user mengetik 'selesai'
         if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
             if (userSessions[m.sender].images.length === 0) {
-                return replygcxeon('⚠️ Belum ada gambar yang dikirim.')
+                return replygcxeon('⚠️ Belum ada gambar yang dikirim.');
             }
         
-            userSessions[m.sender].collecting = false
-            replygcxeon('📄 Sedang membuat file PDF, mohon tunggu...')
+            userSessions[m.sender].collecting = false; // Menandakan pengumpulan gambar selesai
+            replygcxeon('📄 Sedang membuat file PDF, mohon tunggu...');
         
-            const outputPdf = `./temp/${m.sender}_hasil.pdf`
-            await createScannedPDF(userSessions[m.sender].images, outputPdf)
+            const outputPdf = `./temp/${m.sender}_hasil.pdf`; // Menentukan path output PDF
+            await createScannedPDF(userSessions[m.sender].images, outputPdf); // Membuat PDF
         
-            const buffer = fs.readFileSync(outputPdf)
+            const buffer = fs.readFileSync(outputPdf); // Membaca file PDF
             XeonBotInc.sendMessage(m.chat, {
                 document: buffer,
                 mimetype: 'application/pdf',
                 fileName: 'Scan_Hasil.pdf'
-            }, { quoted: m })
+            }, { quoted: m });
         
-            for (let file of userSessions[m.sender].images) fs.unlinkSync(file)
-            fs.unlinkSync(outputPdf)
-            delete userSessions[m.sender]
-        }        
-        // Set up scheduled times and messages
+            // Menghapus file sementara setelah dikirim
+            for (let file of userSessions[m.sender].images) fs.unlinkSync(file);
+            fs.unlinkSync(outputPdf); // Menghapus file PDF yang sudah dibuat
+            delete userSessions[m.sender]; // Menghapus sesi pengumpulan gambar
+        }
 
         switch (command) {
             case 'kick':
