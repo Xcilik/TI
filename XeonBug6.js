@@ -1,4 +1,4 @@
-const { default: makeWaSocket, useMultiFileAuthState, BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto, generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser, getContentType } = require('@whiskeysockets/baileys')
+const { default: makeWaSocket, useMultiFileAuthState, downloadContentFromMessage, BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto, generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser, getContentType } = require('@whiskeysockets/baileys')
 const os = require('os')
 const fs = require('fs') 
 const fsx = require('fs-extra')
@@ -161,26 +161,34 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
-        if (m.mtype == 'imageMessage' && userSessions[m.sender] && userSessions[m.sender].collecting) {
-            console.log("Menerima gambar...");  // Debug log
+        if (
+            m.mtype === 'imageMessage' &&
+            userSessions[m.sender] &&
+            userSessions[m.sender].collecting
+        ) {
+            console.log("Menerima gambar...");
             console.log("Isi pesan:", m);
-
+        
             try {
                 if (!fs.existsSync('./temp')) fs.mkdirSync('./temp');
         
-                let media = await XeonBotInc.downloadMediaMessage(m);
-                let filename = `./temp/${m.sender}_${Date.now()}.jpg`;
-                fs.writeFileSync(filename, media);
+                const stream = await downloadContentFromMessage(m.message.imageMessage, 'image');
+                let buffer = Buffer.from([]);
+                for await (const chunk of stream) {
+                    buffer = Buffer.concat([buffer, chunk]);
+                }
+        
+                const filename = `./temp/${m.sender}_${Date.now()}.jpg`;
+                fs.writeFileSync(filename, buffer);
         
                 console.log(`Gambar disimpan di ${filename}`);
                 userSessions[m.sender].images.push(filename);
                 replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
             } catch (e) {
-                console.log(e);
+                console.error(e);
                 replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.');
             }
         }
-
         
         // Proses PDF saat user mengetik 'selesai'
         if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
