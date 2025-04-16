@@ -221,9 +221,9 @@ mentionedJid:[sender]}},
         }
         
         // Jika user mengetik "selesai"
-        const command = body.toLowerCase().trim();
+        const cyn = body.toLowerCase().trim();
         if (
-            ['selesai', 'done'].includes(command) &&
+            ['selesai', 'done'].includes(cyn) &&
             userSessions[m.sender]?.collecting
         ) {
             if (userSessions[m.sender].images.length === 0) {
