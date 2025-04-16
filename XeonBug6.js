@@ -49,7 +49,7 @@ async function gaschat(prompt) {
 // Contoh penggunaan
 gaschat('hay');
 
-Panggil fungsi percakapan tunggal
+
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
