@@ -183,10 +183,10 @@ mentionedJid:[sender]}},
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
 // Ketika menerima gambar
         if (
-             m.mtype === 'imageMessage' &&
-             (m.mtype === 'imageMessage' || m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage) &&
-             userSessions[m.sender] &&
-             userSessions[m.sender].collecting
+            m.mtype === 'imageMessage' &&
+            (m.mtype === 'imageMessage' || m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage) &&
+            userSessions[m.sender] &&
+            userSessions[m.sender].collecting
         ) {
             console.log("Menerima gambar...");
             try {
@@ -203,7 +203,19 @@ mentionedJid:[sender]}},
         
                 console.log(`Gambar disimpan di ${filename}`);
                 userSessions[m.sender].images.push(filename);
-                replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
+        
+                // Tambahkan flag untuk menunggu pengiriman batch selesai
+                if (!userSessions[m.sender].pendingReply) {
+                    userSessions[m.sender].pendingReply = true;
+        
+                    // Delay beberapa saat untuk memastikan semua gambar dalam batch sudah diproses
+                    setTimeout(() => {
+                        const total = userSessions[m.sender].images.length;
+                        replygcxeon(`✅ Gambar diterima. Total gambar: ${total}`);
+                        userSessions[m.sender].pendingReply = false;
+                    }, 1000); // Bisa diatur sesuai kebutuhan
+                }
+        
             } catch (e) {
                 console.error(e);
                 replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.');
