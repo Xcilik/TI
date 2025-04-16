@@ -47,9 +47,7 @@ async function gaschat(prompt) {
 }
 
 // Contoh penggunaan
-askDeepseek('Buatkan fungsi JavaScript untuk menghitung jumlah huruf vokal');
 
-// Contoh penggunaan
 
 // Panggil fungsi percakapan tunggal
 async function createScannedPDF(images, outputPath) {
