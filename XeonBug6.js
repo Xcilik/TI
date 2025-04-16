@@ -31,7 +31,7 @@ global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 async function askOpenRouter(prompt) {
-    const apiKey = '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';
+    const apiKey = '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';
     const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
 
     try {
