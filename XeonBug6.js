@@ -33,19 +33,26 @@ global.userSessions = global.userSessions || {};
 
 
 // Percakapan Tunggal
-async function startChat(prompt) {
-  try {
-    const { chat } = await import('chatgpt-free-api'); 
-    const response = await chat.startConversation(prompt);
-    console.log(response);
-    return response; // Mengembalikan respons jika diperlukan
-  } catch (error) {
-    console.error('Error starting conversation:', error);
-    return `Terjadi kesalahan: ${error.message}`;
-  }
+const OpenAI = require('openai-free');
+const openai = new OpenAI();
+
+async function gaschat(prompt) {
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo', // model tetap diperlukan
+            messages: [
+                { role: 'user', content: prompt }
+            ]
+        });
+
+        return response.choices[0].message.content;
+    } catch (error) {
+        console.error('Error:', error.message);
+        return 'Gagal mendapatkan respons dari AI.';
+    }
 }
 
-// Percakapan Bertingkat
+
 
 
 // Panggil fungsi percakapan tunggal
@@ -280,7 +287,7 @@ mentionedJid:[sender]}},
         }
 // Auto-reply jika ditag di grup dengan teks
         if (m.isGroup && m.mentionedJid?.includes(botNumber) && q) {
-            startChat(q).then(res => {
+            gaschat(q).then(res => {
                 XeonBotInc.sendMessage(m.chat, {
                     text: res,
                     mentions: [m.sender]
@@ -302,7 +309,7 @@ mentionedJid:[sender]}},
                 if (m.isGroup) return replygcxeon('Gunakan command ini di private chat.');
                 if (!q) return replygcxeon('Masukkan teks untuk dikirim ke AI.\nContoh: .ai Apa itu React?');
             
-                startChat(q).then(res => {
+                gaschat(q).then(res => {
                     XeonBotInc.sendMessage(m.chat, { text: res }, { quoted: m });
                 });
                 break;        
