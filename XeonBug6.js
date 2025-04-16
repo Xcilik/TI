@@ -36,19 +36,27 @@ global.userSessions = global.userSessions || {};
 const { G4F } = require("g4f");
 const g4f = new G4F();
 
-async function gaschat(prompt) {
-    const messages = [
-        { role: "user", content: prompt }
-    ];
 
+
+async function gaschat(prompt) {
     try {
-        const response = await g4f.chatCompletion(messages);
+        const response = await g4f.chatCompletion(
+            [
+                { role: "user", content: prompt }
+            ],
+            {
+                model: "gpt-3.5-turbo" // model bisa disesuaikan, tergantung endpoint
+            }
+        );
+
+        console.log(response);
         return response;
-    } catch (error) {
-        console.error("G4F Error:", error.message);
-        return 'Gagal mendapatkan respons dari AI.';
+    } catch (err) {
+        console.error("G4F Error:", err.message);
+        return "Gagal mendapatkan respon dari AI.";
     }
 }
+
 
 // Contoh pemanggilan
 
