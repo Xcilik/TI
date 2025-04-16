@@ -31,8 +31,7 @@ global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
-const { chat } = require('chatgpt-free-api')
-
+const { chat } = await import('chatgpt-free-api');
 // Percakapan Tunggal
 async function startChat(prompt) {
   try {
