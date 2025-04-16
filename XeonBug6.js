@@ -35,23 +35,57 @@ global.userSessions = global.userSessions || {};
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
-    for (let imgPath of images) {
-        // Baca gambar dengan OpenCV
+    for (const imgPath of images) {
         let mat = cv.imread(imgPath);
 
-        // Ubah ke grayscale
-        let gray = mat.bgrToGray();
+        // Resize jika gambar terlalu besar
+        if (mat.cols > 1500) {
+            mat = mat.resizeToMax(1500);
+        }
 
-        // Adaptive threshold agar hasil jadi hitam-putih bersih
-        let thresholded = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv.THRESH_BINARY, 11, 2);
+        // Preprocessing
+        const gray = mat.bgrToGray();
+        const blurred = gray.gaussianBlur(new cv.Size(5, 5), 0);
+        const edged = blurred.canny(75, 200);
 
-        // Simpan sementara sebagai JPG
-        const tempPath = path.join(__dirname, 'temp.jpg');
-        cv.imwrite(tempPath, thresholded);
+        // Cari kontur
+        const contours = edged.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        const sorted = contours.sort((c1, c2) => c2.area - c1.area);
 
-        // Embed ke PDF pakai pdf-lib
-        const imageBuffer = fs.readFileSync(tempPath);
+        let docContour = null;
+        for (let c of sorted) {
+            const peri = c.arcLength(true);
+            const approx = c.approxPolyDP(0.02 * peri, true);
+            if (approx.length === 4) {
+                docContour = approx;
+                break;
+            }
+        }
+
+        if (docContour) {
+            // Transformasi perspektif
+            const srcPts = docContour.getPoints();
+            const dstPts = [
+                new cv.Point2(0, 0),
+                new cv.Point2(595, 0),
+                new cv.Point2(595, 842),
+                new cv.Point2(0, 842)
+            ];
+            const M = cv.getPerspectiveTransform(srcPts, dstPts);
+            mat = mat.warpPerspective(M, new cv.Size(595, 842));
+        }
+
+        // Enhance hasil akhir
+        const finalGray = mat.bgrToGray();
+        const contrast = finalGray.equalizeHist(); // boosting kontras
+        const thresholded = contrast.adaptiveThreshold(
+            255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv.THRESH_BINARY, 15, 10
+        );
+
+        // Encode langsung ke buffer (tanpa simpan file)
+        const imageBuffer = cv.imencode('.jpg', thresholded);
+
         const pdfImage = await pdfDoc.embedJpg(imageBuffer);
         const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
 
@@ -61,17 +95,12 @@ async function createScannedPDF(images, outputPath) {
             width: pdfImage.width,
             height: pdfImage.height
         });
-
-        // Hapus file sementara
-        fs.unlinkSync(tempPath);
     }
 
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
     console.log(`PDF selesai dibuat di ${outputPath}`);
 }
-
-
 //bug databas
 
 //database
