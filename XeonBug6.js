@@ -588,17 +588,20 @@ _Powered by Ti Unusia Bot._
                 let {
                     toPTT
                 } = require('./lib/converter')
-                let audio = await toPTT(media, 'mp4')
+            
+                // Convert media to PTT format (ogg or mpeg)
+                let audio = await toPTT(media, 'ogg') // Gunakan 'ogg' atau 'mp3' sebagai format alternatif
+                
                 XeonBotInc.sendMessage(m.chat, {
                     audio: audio,
-                    mimetype: 'audio/mpeg',
+                    mimetype: 'audio/ogg', // Pastikan MIME sesuai dengan format output
                     ptt: true
                 }, {
                     quoted: m
                 })
-
             }
-            break
+            break;
+
             case 'togif': {
                 if (!qmsg) {
                     return replygcxeon('Penggunaan: *togif* balas kepesan stiker animasi/video');
