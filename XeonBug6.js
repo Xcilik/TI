@@ -32,25 +32,33 @@ global.userSessions = global.userSessions || {};
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
 
+
+
 async function gaschat(prompt) {
     try {
-        const response = await axios.post('https://api.pawan.krd/v1/chat/completions', {
-            model: 'gpt-3.5-turbo',
-            messages: [
-                { role: 'user', content: prompt }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
+        const response = await axios.post(
+            'https://gpt.bionic.ai/chat',
+            {
+                messages: [
+                    { role: 'user', content: prompt }
+                ]
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        });
+        );
 
-        return response.data.choices[0].message.content;
+        const result = response.data.choices?.[0]?.message?.content;
+        return result || 'AI tidak menjawab.';
     } catch (error) {
-        console.error('Pawan Error:', error.response?.data || error.message);
-        return 'Gagal mendapatkan respons dari AI.';
+        console.error('Bionic Error:', error.response?.data || error.message);
+        return 'Gagal mendapatkan jawaban dari BionicGPT.';
     }
 }
+
+// Contoh pemakaian:
 
 // Contoh pemakaian
 
@@ -285,14 +293,7 @@ mentionedJid:[sender]}},
         
         }
 // Auto-reply jika ditag di grup dengan teks
-        if (m.isGroup && m.mentionedJid?.includes(botNumber) && q) {
-            gaschat(q).then(res => {
-                XeonBotInc.sendMessage(m.chat, {
-                    text: res,
-                    mentions: [m.sender]
-                }, { quoted: m });
-            });
-        }
+        
         
 
         switch (command) {
