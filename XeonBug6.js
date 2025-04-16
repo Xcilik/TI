@@ -38,7 +38,7 @@ async function askOpenRouter(prompt) {
             messages: [{ role: 'user', content: prompt }]
         }, {
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer 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`,
                 'Content-Type': 'application/json'
             }
         });
