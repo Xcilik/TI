@@ -300,7 +300,7 @@ mentionedJid:[sender]}},
                         };
             
                         // Mengirim pesan instruksi kepada pengguna
-                        replygcxeon('Kirimkan gambar yang ingin kamu jadikan PDF. Jika sudah selesai, ketik *selesai* untuk memproses.');
+                        replygcxeon('Kirimkan gambar yang ingin kamu jadikan PDF. Jika sudah selesai, ketik *selesai* untuk memproses.\n\nNote: _Kirim gambar dengan kualitas HD untuk hasil yang bagus._');
                     } else {
                         // Jika pengguna sudah dalam sesi, beri tahu mereka untuk mengirim "selesai"
                         replygcxeon('Kamu masih dalam sesi. Kirim *selesai* jika sudah mengirim semua gambar.');
