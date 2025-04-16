@@ -37,11 +37,12 @@ async function createScannedPDF(images, outputPath) {
 
         // Proses gambar seperti di CamScanner
         image
-            .greyscale()       // Mengubah gambar menjadi grayscale
-            .contrast(1)       // Menambah kontras
-            .brightness(0.1)   // Menambah sedikit kecerahan
-            .normalize()       // Normalisasi gambar
-            .quality(80);      // Mengurangi kualitas gambar untuk kompresi
+            .greyscale()
+            .brightness(0.2)
+            .contrast(0.3)
+            .threshold({ max: 200 })  // Ubah nilai ini sesuai pencahayaan gambar kamu
+            .quality(80);
+    // Mengurangi kualitas gambar untuk kompresi
 
         let processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
         const pdfImage = await pdfDoc.embedJpg(processedBuffer);
