@@ -25,6 +25,10 @@ const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 const { PDFDocument } = require('pdf-lib')
 const Jimp = require('jimp')
 
+
+global.userSessions = global.userSessions || {};
+
+
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
@@ -134,7 +138,6 @@ module.exports = XeonBotInc = async (XeonBotInc, m, msg, chatUpdate, store) => {
         expiredCheck(XeonBotInc, m, premium);
 //group chat msg by xeon
 
-        const userSessions = {}
 
 const replygcxeon = (teks) => {
 XeonBotInc.sendMessage(m.chat,
@@ -158,19 +161,20 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
-        if (m.mtype == 'imageMessage') {
-            console.log("Menerima gambar...");  // Menambahkan log
+        if (m.mtype == 'imageMessage' && userSessions[m.sender] && userSessions[m.sender].collecting) {
+            console.log("Menerima gambar...");  // Debug log
+            console.log("Tipe pesan:", m.mtype);
+            console.log("Isi pesan:", m);
 
             try {
-                if (!fs.existsSync('./temp')) fs.mkdirSync('./temp'); // Pastikan folder temp ada
+                if (!fs.existsSync('./temp')) fs.mkdirSync('./temp');
         
-                let media = await XeonBotInc.downloadMediaMessage(m); // Mendownload media
-                let filename = `./temp/${m.sender}_${Date.now()}.jpg`; // Menyimpan dengan nama unik
-                fs.writeFileSync(filename, media); // Menyimpan file gambar ke folder temp
+                let media = await XeonBotInc.downloadMediaMessage(m);
+                let filename = `./temp/${m.sender}_${Date.now()}.jpg`;
+                fs.writeFileSync(filename, media);
         
-                console.log(`Gambar disimpan di ${filename}`); // Tambahkan log ini untuk mengecek
-        
-                userSessions[m.sender].images.push(filename); // Menambahkan gambar ke sesi pengumpulan
+                console.log(`Gambar disimpan di ${filename}`);
+                userSessions[m.sender].images.push(filename);
                 replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
             } catch (e) {
                 console.log(e);
