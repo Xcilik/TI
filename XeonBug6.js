@@ -31,24 +31,26 @@ global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
-
-async function askGemini(prompt) {
-    const apiKey = 'AIzaSyAix_9WX9p-kNATAeaDI1JpaR-lLNP2qh0';
-    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey;
+async function askOpenRouter(prompt) {
+    const apiKey = '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';
+    const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
 
     try {
-        const response = await axios.post(endpoint, {
-            contents: [{ parts: [{ text: prompt }] }]
+        const res = await axios.post(endpoint, {
+            model: 'mistral/mistral-7b-instruct', // model gratis
+            messages: [{ role: "user", content: prompt }]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
         });
 
-        const reply = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
-        return reply || 'Maaf, saya tidak dapat menjawab.';
-    } catch (err) {
-        console.error('Gemini API Error:', err);
-        return 'Terjadi kesalahan saat menghubungi AI.';
+        return res.data.choices?.[0]?.message?.content || 'Gagal menjawab.';
+    } catch (e) {
+        return 'Gagal konek ke OpenRouter.';
     }
 }
-
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
