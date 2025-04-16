@@ -163,7 +163,6 @@ mentionedJid:[sender]}},
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
         if (m.mtype == 'imageMessage' && userSessions[m.sender] && userSessions[m.sender].collecting) {
             console.log("Menerima gambar...");  // Debug log
-            console.log("Tipe pesan:", m.mtype);
             console.log("Isi pesan:", m);
 
             try {
