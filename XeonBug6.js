@@ -31,30 +31,24 @@ global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 async function askOpenRouter(prompt) {
-    const apiKey = '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';
-    const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-
+    const apiKey = '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'; // Ganti dengan key Tuan
     try {
-        const response = await axios.post(endpoint, {
-            model: 'openai/gpt-3.5-turbo',
-            messages: [{ role: "user", content: prompt }]
+        const res = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+            model: 'openai/gpt-4o',
+            messages: [{ role: 'user', content: prompt }]
         }, {
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://wa.me', // Optional, kadang dibutuhkan OpenRouter
+                'Content-Type': 'application/json'
             }
         });
 
-        const reply = response.data.choices?.[0]?.message?.content;
-        return reply?.trim() || 'Gagal menjawab (kosong).';
-
+        return res.data.choices?.[0]?.message?.content || 'Bot diam saja.';
     } catch (e) {
-        console.error('[OpenRouter Error]', e?.response?.data || e?.message);
-        return 'Gagal konek ke OpenRouter.';
+        console.error('[OpenRouter Error]', e.response?.data || e.message);
+        return `Gagal konek: ${e.response?.data?.error?.message || 'Tidak diketahui'}`;
     }
 }
-
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
