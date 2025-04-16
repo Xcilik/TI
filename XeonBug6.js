@@ -30,26 +30,25 @@ const cv = require('opencv4nodejs-prebuilt-install');
 global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
-async function askOpenRouter(prompt) {
-    const apiKey = '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'; // Ganti dengan key Tuan
-    try {
-        const res = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: 'openai/gpt-4o',
-            messages: [{ role: 'user', content: prompt }]
-        }, {
-            headers: {
-                'Authorization': `Bearer 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`,
-                'Content-Type': 'application/json'
-            }
-        });
 
-        return res.data.choices?.[0]?.message?.content || 'Bot diam saja.';
-    } catch (e) {
-        console.error('[OpenRouter Error]', e.response?.data || e.message);
-        return `Gagal konek: ${e.response?.data?.error?.message || 'Tidak diketahui'}`;
-    }
+const { chat } = require('chatgpt-free-api')
+
+// Percakapan Tunggal
+async function startChat(prompt) {
+  try {
+    const response = await chat.startConversation(message);
+    console.log(response);
+    return response; // Mengembalikan respons jika diperlukan
+  } catch (error) {
+    console.error('Error starting conversation:', error);
+    return `Terjadi kesalahan: ${error.message}`;
+  }
 }
 
+// Percakapan Bertingkat
+
+
+// Panggil fungsi percakapan tunggal
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
@@ -281,7 +280,7 @@ mentionedJid:[sender]}},
         }
 // Auto-reply jika ditag di grup dengan teks
         if (m.isGroup && m.mentionedJid?.includes(botNumber) && q) {
-            askOpenRouter(q).then(res => {
+            startChat(q).then(res => {
                 XeonBotInc.sendMessage(m.chat, {
                     text: res,
                     mentions: [m.sender]
@@ -303,7 +302,7 @@ mentionedJid:[sender]}},
                 if (m.isGroup) return replygcxeon('Gunakan command ini di private chat.');
                 if (!q) return replygcxeon('Masukkan teks untuk dikirim ke AI.\nContoh: .ai Apa itu React?');
             
-                askOpenRouter(q).then(res => {
+                startChat(q).then(res => {
                     XeonBotInc.sendMessage(m.chat, { text: res }, { quoted: m });
                 });
                 break;        
