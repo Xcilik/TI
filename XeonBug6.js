@@ -31,6 +31,25 @@ global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
+
+async function askGemini(prompt) {
+    const apiKey = 'AIzaSyClIEZ1fWS5TBA8L1gbm-AielX2bhhMxCI';
+    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey;
+
+    try {
+        const response = await axios.post(endpoint, {
+            contents: [{ parts: [{ text: prompt }] }]
+        });
+
+        const reply = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+        return reply || 'Maaf, saya tidak dapat menjawab.';
+    } catch (err) {
+        console.error('Gemini API Error:', err);
+        return 'Terjadi kesalahan saat menghubungi AI.';
+    }
+}
+
+
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
@@ -260,7 +279,16 @@ mentionedJid:[sender]}},
             delete userSessions[m.sender];
         
         }
-
+// Auto-reply jika ditag di grup dengan teks
+        if (m.isGroup && m.mentionedJid?.includes(botNumber) && q) {
+            askGemini(q).then(res => {
+                XeonBotInc.sendMessage(m.chat, {
+                    text: res,
+                    mentions: [m.sender]
+                }, { quoted: m });
+            });
+        }
+        
 
         switch (command) {
             case 'kick':
@@ -270,6 +298,15 @@ mentionedJid:[sender]}},
                 let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
                 break
+// AI Command untuk private chat
+            case 'ai':
+                if (m.isGroup) return replygcxeon('Gunakan command ini di private chat.');
+                if (!q) return replygcxeon('Masukkan teks untuk dikirim ke AI.\nContoh: .ai Apa itu React?');
+            
+                askGemini(q).then(res => {
+                    XeonBotInc.sendMessage(m.chat, { text: res }, { quoted: m });
+                });
+                break;        
             case 'all':                        
             case 'tagall':
                 if (!m.isGroup) return replygcxeon(mess.group)
