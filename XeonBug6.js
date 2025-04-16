@@ -24,7 +24,7 @@ const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 
 const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
-const cv = require('opencv4nodejs-prebuilt');
+const cv = require('opencv4nodejs-prebuilt-install');
 
 
 global.userSessions = global.userSessions || {};
