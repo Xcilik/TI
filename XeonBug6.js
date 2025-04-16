@@ -319,7 +319,6 @@ _Powered by Ti Unusia Bot._
         
                 XeonBotInc.sendMessage(m.chat, buttonMessage, { quoted: m });
             }
-            }
             break
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
