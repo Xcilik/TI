@@ -213,7 +213,7 @@ mentionedJid:[sender]}},
                         const total = userSessions[m.sender].images.length;
                         replygcxeon(`✅ Gambar diterima. Total gambar: ${total}`);
                         userSessions[m.sender].pendingReply = false;
-                    }, 1000); // Bisa diatur sesuai kebutuhan
+                    }, 1500); // Bisa diatur sesuai kebutuhan
                 }
         
             } catch (e) {
