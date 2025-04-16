@@ -158,7 +158,7 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
-        if (m.mimetype?.includes('image')) {
+        if (m.mtype == 'imageMessage') {
             console.log("Menerima gambar...");  // Menambahkan log
 
             try {
