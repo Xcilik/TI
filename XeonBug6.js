@@ -36,7 +36,7 @@ global.userSessions = global.userSessions || {};
 async function startChat(prompt) {
   try {
     const { chat } = await import('chatgpt-free-api'); 
-    const response = await chat.startConversation(message);
+    const response = await chat.startConversation(prompt);
     console.log(response);
     return response; // Mengembalikan respons jika diperlukan
   } catch (error) {
