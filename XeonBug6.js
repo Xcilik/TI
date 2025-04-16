@@ -32,35 +32,27 @@ global.userSessions = global.userSessions || {};
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
 
-// Percakapan Tunggal
-const { G4F } = require("g4f");
-const g4f = new G4F();
-
-
-
 async function gaschat(prompt) {
     try {
-        const response = await g4f.chatCompletion(
-            [
-                { role: "user", content: prompt }
-            ],
-            {
-                model: "gpt-3.5-turbo" // model bisa disesuaikan, tergantung endpoint
+        const response = await axios.post('https://api.pawan.krd/v1/chat/completions', {
+            model: 'gpt-3.5-turbo',
+            messages: [
+                { role: 'user', content: prompt }
+            ]
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
             }
-        );
+        });
 
-        console.log(response);
-        return response;
-    } catch (err) {
-        console.error("G4F Error:", err.message);
-        return "Gagal mendapatkan respon dari AI.";
+        return response.data.choices[0].message.content;
+    } catch (error) {
+        console.error('Pawan Error:', error.response?.data || error.message);
+        return 'Gagal mendapatkan respons dari AI.';
     }
 }
 
-
-// Contoh pemanggilan
-
-
+// Contoh pemakaian
 
 // Panggil fungsi percakapan tunggal
 async function createScannedPDF(images, outputPath) {
