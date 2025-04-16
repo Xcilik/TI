@@ -23,43 +23,52 @@ const { addPremiumUser, getPremiumExpired, getPremiumPosition, expiredCheck, che
 const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 
 const { PDFDocument } = require('pdf-lib')
-const Jimp = require('jimp')
+// const Jimp = require('jimp')
+const cv = require('opencv4nodejs');
 
 
 global.userSessions = global.userSessions || {};
+
+
 
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
     for (let imgPath of images) {
-        let image = await Jimp.read(imgPath);
+        // Baca gambar dengan OpenCV
+        let mat = cv.imread(imgPath);
 
-        // Proses mirip CamScanner: tingkatkan kualitas teks & hilangkan bayangan
-        image
-            .greyscale()                // Ubah ke grayscale
-            .contrast(1)                // Tingkatkan kontras maksimal
-            .brightness(0.4)            // Cerahkan sedikit
-            .normalize() 
-            .threshold({ max: 180 })// Normalisasi histogram
-            .posterize(2)               // Kurangi ke 2 level warna (hitam/putih)
-            .blur(1);                   // Sedikit blur untuk menghaluskan tepi kasar
+        // Ubah ke grayscale
+        let gray = mat.bgrToGray();
 
-        const processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
-        const pdfImage = await pdfDoc.embedJpg(processedBuffer);
+        // Adaptive threshold agar hasil jadi hitam-putih bersih
+        let thresholded = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv.THRESH_BINARY, 11, 2);
 
+        // Simpan sementara sebagai JPG
+        const tempPath = path.join(__dirname, 'temp.jpg');
+        cv.imwrite(tempPath, thresholded);
+
+        // Embed ke PDF pakai pdf-lib
+        const imageBuffer = fs.readFileSync(tempPath);
+        const pdfImage = await pdfDoc.embedJpg(imageBuffer);
         const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+
         page.drawImage(pdfImage, {
             x: 0,
             y: 0,
             width: pdfImage.width,
             height: pdfImage.height
         });
+
+        // Hapus file sementara
+        fs.unlinkSync(tempPath);
     }
 
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-    console.log('PDF selesai dibuat, disimpan ke: ' + outputPath);
+    console.log(`PDF selesai dibuat di ${outputPath}`);
 }
 
 
