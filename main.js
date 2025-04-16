@@ -23,6 +23,7 @@ const readline = require("readline")
 const startScheduler = require('./lib/schduler') // Pastikan path-nya benar
 const { parsePhoneNumber } = require("libphonenumber-js")
 const makeWASocket = require("@whiskeysockets/baileys").default
+const crypto = require('crypto').webcrypto;
 
 const store = makeInMemoryStore({
     logger: pino().child({
