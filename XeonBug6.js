@@ -54,6 +54,7 @@ async function createScannedPDF(images, outputPath) {
 
     // Menyimpan file PDF
     const pdfBytes = await pdfDoc.save();
+    console.log('PDF selesai dibuat, menyimpan ke ' + outputPath); // Tambahkan log
     fs.writeFileSync(outputPath, pdfBytes);
 }
 
@@ -160,10 +161,12 @@ mentionedJid:[sender]}},
         if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
             try {
                 if (!fs.existsSync('./temp')) fs.mkdirSync('./temp'); // Pastikan folder temp ada
-                
+        
                 let media = await XeonBotInc.downloadMediaMessage(m); // Mendownload media
                 let filename = `./temp/${m.sender}_${Date.now()}.jpg`; // Menyimpan dengan nama unik
                 fs.writeFileSync(filename, media); // Menyimpan file gambar ke folder temp
+        
+                console.log(`Gambar disimpan di ${filename}`); // Tambahkan log ini untuk mengecek
         
                 userSessions[m.sender].images.push(filename); // Menambahkan gambar ke sesi pengumpulan
                 replygcxeon(`✅ Gambar diterima. Total gambar: ${userSessions[m.sender].images.length}`);
@@ -172,9 +175,12 @@ mentionedJid:[sender]}},
                 replygcxeon('❌ Gagal menyimpan gambar. Coba lagi.');
             }
         }
+
         
         // Proses PDF saat user mengetik 'selesai'
         if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
+            console.log('Perintah selesai diterima'); // Tambahkan log ini untuk memeriksa
+        
             if (userSessions[m.sender].images.length === 0) {
                 return replygcxeon('⚠️ Belum ada gambar yang dikirim.');
             }
@@ -197,6 +203,7 @@ mentionedJid:[sender]}},
             fs.unlinkSync(outputPdf); // Menghapus file PDF yang sudah dibuat
             delete userSessions[m.sender]; // Menghapus sesi pengumpulan gambar
         }
+
 
         switch (command) {
             case 'kick':
