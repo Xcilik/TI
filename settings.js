@@ -63,7 +63,7 @@ global.mess = {
     owner: 'This feature can be used by owner only',
     group: 'This feature is only for groups',
     private: 'This feature is only for private chats',
-    wait: 'In process... ',    
+    wait: '_Processing..._',    
     error: 'Error!',
 }
 
