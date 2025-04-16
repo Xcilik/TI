@@ -36,7 +36,7 @@ async function askOpenRouter(prompt) {
 
     try {
         const response = await axios.post(endpoint, {
-            model: 'mistral/mistral-7b-instruct', // model gratis
+            model: 'openai/gpt-3.5-turbo',
             messages: [{ role: "user", content: prompt }]
         }, {
             headers: {
