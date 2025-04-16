@@ -181,7 +181,7 @@ mentionedJid:[sender]}},
                 })
                 break
 
-           case 'buatpdf': {
+            case 'buatpdf': {
                 if (!m.isGroup) {
                     if (!userSessions[m.sender]) {
                         userSessions[m.sender] = {
@@ -195,7 +195,7 @@ mentionedJid:[sender]}},
                     }
                 }
                 break
-                
+    
                         
             case 'swm': case 'steal': case 'stickerwm': case 'take':{
                 if (!args.join(" ")) return replygcxeon(`Where is the text?`)
@@ -386,39 +386,7 @@ mentionedJid:[sender]}},
                     })
                 }
             }
-            break
-            default: {
-                // Tangani gambar yang dikirim
-                if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
-                    let media = await XeonBotInc.downloadMediaMessage(m)
-                    let filename = `./temp/${m.sender}_${Date.now()}.jpg`
-                    fs.writeFileSync(filename, media)
-        
-                    userSessions[m.sender].images.push(filename)
-                    replygcxeon(`Gambar diterima. Total: ${userSessions[m.sender].images.length} gambar.`)
-                }
-        
-                // Tangani jika user ketik 'selesai'
-                if (body === 'selesai' && userSessions[m.sender]?.collecting) {
-                    userSessions[m.sender].collecting = false
-                    replygcxeon('Memproses gambar menjadi PDF...')
-        
-                    let pdfPath = `./temp/${m.sender}_output.pdf`
-                    await createScannedPDF(userSessions[m.sender].images, pdfPath)
-        
-                    let buffer = fs.readFileSync(pdfPath)
-                    XeonBotInc.sendMessage(m.chat, {
-                        document: buffer,
-                        fileName: 'HasilScan.pdf',
-                        mimetype: 'application/pdf'
-                    }, { quoted: m })
-        
-                    // Hapus file dan session
-                    for (let img of userSessions[m.sender].images) fs.unlinkSync(img)
-                    fs.unlinkSync(pdfPath)
-                    delete userSessions[m.sender]
-                }
-            }            
+            break           
  
         }
     } catch (err) {
@@ -426,6 +394,48 @@ mentionedJid:[sender]}},
         console.log(util.format(err))
     }
 }
+
+
+
+if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
+    try {
+        if (!fs.existsSync('./temp')) fs.mkdirSync('./temp')
+
+        let media = await XeonBotInc.downloadMediaMessage(m)
+        let filename = `./temp/${m.sender}_${Date.now()}.jpg`
+        fs.writeFileSync(filename, media)
+
+        userSessions[m.sender].images.push(filename)
+        replygcxeon(`✅ Gambar diterima. Total saat ini: ${userSessions[m.sender].images.length}`)
+    } catch (e) {
+        console.log(e)
+        replygcxeon('❌ Gagal menyimpan gambar.')
+    }
+}
+
+// HANDLE KETIK 'selesai'
+if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
+    userSessions[m.sender].collecting = false
+    replygcxeon('📄 Memproses menjadi PDF...')
+
+    let pdfPath = `./temp/${m.sender}_output.pdf`
+    await createScannedPDF(userSessions[m.sender].images, pdfPath)
+
+    let buffer = fs.readFileSync(pdfPath)
+    XeonBotInc.sendMessage(m.chat, {
+        document: buffer,
+        fileName: 'HasilScan.pdf',
+        mimetype: 'application/pdf'
+    }, { quoted: m })
+
+    // Bersihkan sampah
+    for (let img of userSessions[m.sender].images) fs.unlinkSync(img)
+    fs.unlinkSync(pdfPath)
+    delete userSessions[m.sender]
+}
+
+
+
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
     fs.unwatchFile(file)
@@ -433,6 +443,7 @@ fs.watchFile(file, () => {
     delete require.cache[file]
     require(file)
 })
+
 
 process.on('uncaughtException', function (err) {
 let e = String(err)
