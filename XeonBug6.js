@@ -283,7 +283,7 @@ mentionedJid:[sender]}},
         }
 // Auto-reply jika ditag di grup dengan teks
         if (m.isGroup && m.mentionedJid?.includes(botNumber) && q) {
-            askGemini(q).then(res => {
+            askOpenRouter(q).then(res => {
                 XeonBotInc.sendMessage(m.chat, {
                     text: res,
                     mentions: [m.sender]
@@ -305,7 +305,7 @@ mentionedJid:[sender]}},
                 if (m.isGroup) return replygcxeon('Gunakan command ini di private chat.');
                 if (!q) return replygcxeon('Masukkan teks untuk dikirim ke AI.\nContoh: .ai Apa itu React?');
             
-                askGemini(q).then(res => {
+                askOpenRouter(q).then(res => {
                     XeonBotInc.sendMessage(m.chat, { text: res }, { quoted: m });
                 });
                 break;        
