@@ -40,7 +40,8 @@ async function createScannedPDF(images, outputPath) {
             .greyscale()                // Ubah ke grayscale
             .contrast(1)                // Tingkatkan kontras maksimal
             .brightness(0.4)            // Cerahkan sedikit
-            .normalize()                // Normalisasi histogram
+            .normalize() 
+            .threshold({ max: 180 })// Normalisasi histogram
             .posterize(2)               // Kurangi ke 2 level warna (hitam/putih)
             .blur(1);                   // Sedikit blur untuk menghaluskan tepi kasar
 
