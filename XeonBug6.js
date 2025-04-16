@@ -34,33 +34,29 @@ global.userSessions = global.userSessions || {};
 
 
 
+     
+
+
+
 async function gaschat(prompt) {
     try {
-        const response = await axios.post(
-            'https://gpt.bionic.ai/chat',
-            {
-                messages: [
-                    { role: 'user', content: prompt }
-                ]
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+        const response = await axios.post('https://free.churchless.tech/v1/chat/completions', {
+            model: 'gpt-3.5-turbo',
+            messages: [
+                { role: 'user', content: prompt }
+            ]
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
             }
-        );
+        });
 
-        const result = response.data.choices?.[0]?.message?.content;
-        return result || 'AI tidak menjawab.';
+        return response.data.choices[0].message.content;
     } catch (error) {
-        console.error('Bionic Error:', error.response?.data || error.message);
-        return 'Gagal mendapatkan jawaban dari BionicGPT.';
+        console.error('Churchless Error:', error.response?.data || error.message);
+        return 'Gagal menjawab. Server mungkin sibuk.';
     }
 }
-
-// Contoh pemakaian:
-
-// Contoh pemakaian
 
 // Panggil fungsi percakapan tunggal
 async function createScannedPDF(images, outputPath) {
