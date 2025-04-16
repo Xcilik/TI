@@ -177,13 +177,16 @@ mentionedJid:[sender]}},
             console.log(chalk.black(chalk.bgWhite('[ MESSAGE ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> From'), chalk.green(pushname), chalk.yellow(m.sender))
         }
             
-        
+
+
+                
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
 // Ketika menerima gambar
         if (
-            m.mtype === 'imageMessage' &&
-            userSessions[m.sender] &&
-            userSessions[m.sender].collecting
+             m.mtype === 'imageMessage' &&
+             (m.mtype === 'imageMessage' || m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage) &&
+             userSessions[m.sender] &&
+             userSessions[m.sender].collecting
         ) {
             console.log("Menerima gambar...");
             try {
