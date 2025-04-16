@@ -26,7 +26,6 @@ const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
 const cv = require('opencv4nodejs-prebuilt-install');
 
-
 global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
@@ -34,21 +33,6 @@ global.userSessions = global.userSessions || {};
 
 // file: ask-deepseek.js
 // file: ask-deepseek.js
-const { deepseek } = require('@ai-sdk/deepseek');
-
-async function gaschat(prompt) {
-  try {
-    const { text } = await deepseek('deepseek-chat', prompt);
-
-    console.log('Jawaban dari DeepSeek:', text);
-  } catch (error) {
-    console.error('Terjadi kesalahan:', error);
-  }
-}
-
-// Contoh penggunaan
-gaschat('hay');
-
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
@@ -291,15 +275,7 @@ mentionedJid:[sender]}},
                 let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
                 break
-// AI Command untuk private chat
-            case 'ai':
-                if (m.isGroup) return replygcxeon('Gunakan command ini di private chat.');
-                if (!q) return replygcxeon('Masukkan teks untuk dikirim ke AI.\nContoh: .ai Apa itu React?');
-            
-                gaschat(q).then(res => {
-                    XeonBotInc.sendMessage(m.chat, { text: res }, { quoted: m });
-                });
-                break;        
+       
             case 'all':                        
             case 'tagall':
                 if (!m.isGroup) return replygcxeon(mess.group)
