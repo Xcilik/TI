@@ -32,31 +32,24 @@ global.userSessions = global.userSessions || {};
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
 
-
-
-     
-
-
+// file: ask-deepseek.js
+const { deepseek } = require('@ai-sdk/deepseek');
+const { generateText } = require('ai');
 
 async function gaschat(prompt) {
-    try {
-        const response = await axios.post('https://free.churchless.tech/v1/chat/completions', {
-            model: 'gpt-3.5-turbo',
-            messages: [
-                { role: 'user', content: prompt }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+  try {
+    const { text } = await generateText({
+      model: deepseek('deepseek-chat'),
+      prompt: prompt,
+    });
 
-        return response.data.choices[0].message.content;
-    } catch (error) {
-        console.error('Churchless Error:', error.response?.data || error.message);
-        return 'Gagal menjawab. Server mungkin sibuk.';
-    }
+    console.log('Jawaban dari DeepSeek:', text);
+  } catch (error) {
+    console.error('Terjadi kesalahan:', error);
+  }
 }
+
+// Contoh penggunaan
 
 // Panggil fungsi percakapan tunggal
 async function createScannedPDF(images, outputPath) {
