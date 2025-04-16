@@ -178,8 +178,6 @@ mentionedJid:[sender]}},
         }
             
 
-
-                
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
 // Ketika menerima gambar
         if (
@@ -211,9 +209,9 @@ mentionedJid:[sender]}},
                     // Delay beberapa saat untuk memastikan semua gambar dalam batch sudah diproses
                     setTimeout(() => {
                         const total = userSessions[m.sender].images.length;
-                        replygcxeon(`✅ Gambar diterima. Total gambar: ${total}`);
+                        replygcxeon(`✅ Gambar diterima. Total gambar: ${total}\n\nKetik *selesai* untuk memprosses`);
                         userSessions[m.sender].pendingReply = false;
-                    }, 1500); // Bisa diatur sesuai kebutuhan
+                    }, 1000); // Bisa diatur sesuai kebutuhan
                 }
         
             } catch (e) {
@@ -223,7 +221,11 @@ mentionedJid:[sender]}},
         }
         
         // Jika user mengetik "selesai"
-        if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
+        const command = body.toLowerCase().trim();
+        if (
+            ['selesai', 'done'].includes(command) &&
+            userSessions[m.sender]?.collecting
+        ) {
             if (userSessions[m.sender].images.length === 0) {
                 return replygcxeon('⚠️ Belum ada gambar yang dikirim.');
             }
@@ -231,7 +233,8 @@ mentionedJid:[sender]}},
             userSessions[m.sender].collecting = false;
             userSessions[m.sender].awaitingFileName = true;
             return replygcxeon('📝 Masukkan nama file PDF yang diinginkan (tanpa spasi, tanpa .pdf)');
-        }
+        }                
+
         
         // Setelah itu user akan mengirim nama file
         if (userSessions[m.sender]?.awaitingFileName) {
