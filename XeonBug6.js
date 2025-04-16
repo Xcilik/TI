@@ -23,70 +23,30 @@ const { addPremiumUser, getPremiumExpired, getPremiumPosition, expiredCheck, che
 const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 
 const { PDFDocument } = require('pdf-lib')
-// const Jimp = require('jimp')
-const cv = require('opencv4nodejs-prebuilt-install');
+const Jimp = require('jimp')
 
 
 global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 
-// Fungsi untuk urutkan 4 titik dokumen (atas kiri, atas kanan, bawah kanan, bawah kiri)
-function orderPoints(pts) {
-    const [tl, tr, br, bl] = (() => {
-        const sorted = pts.sort((a, b) => a.y - b.y);
-        const top = sorted.slice(0, 2).sort((a, b) => a.x - b.x);
-        const bottom = sorted.slice(2, 4).sort((a, b) => a.x - b.x);
-        return [top[0], top[1], bottom[1], bottom[0]];
-    })();
-    return [tl, tr, br, bl];
-}
-
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
-    for (const imgPath of images) {
-        let mat = cv.imread(imgPath);
-        if (mat.cols > 1500) mat = mat.resizeToMax(1500);
+    for (let imgPath of images) {
+        let image = await Jimp.read(imgPath);
 
-        const gray = mat.bgrToGray();
-        const blurred = gray.gaussianBlur(new cv.Size(5, 5), 0);
-        const edged = blurred.canny(75, 200);
+        // Proses mirip CamScanner: tingkatkan kualitas teks & hilangkan bayangan
+        image
+            .greyscale()                // Ubah ke grayscale
+            .contrast(1)                // Tingkatkan kontras maksimal
+            .brightness(0.4)            // Cerahkan sedikit
+            .normalize()                // Normalisasi histogram
+            .posterize(2)               // Kurangi ke 2 level warna (hitam/putih)
+            .blur(1);                   // Sedikit blur untuk menghaluskan tepi kasar
 
-        const contours = edged.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-        const sorted = contours.sort((a, b) => b.area - a.area);
-
-        let transformed = mat;
-        let warped = false;
-
-        for (const c of sorted) {
-            const peri = c.arcLength(true);
-            const approx = c.approxPolyDP(0.02 * peri, true);
-            if (approx.length === 4) {
-                const pts = orderPoints(approx);
-                const width = 800;
-                const height = 1000;
-                const dst = [
-                    new cv.Point2(0, 0),
-                    new cv.Point2(width - 1, 0),
-                    new cv.Point2(width - 1, height - 1),
-                    new cv.Point2(0, height - 1)
-                ];
-                const M = cv.getPerspectiveTransform(pts, dst);
-                transformed = mat.warpPerspective(M, new cv.Size(width, height));
-                warped = true;
-                break;
-            }
-        }
-
-        // Enhance hasil akhir
-        const enhanced = transformed.bgrToGray()
-            .gaussianBlur(new cv.Size(3, 3), 0)
-            .equalizeHist()
-            .adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 15, 10);
-
-        const imageBuffer = cv.imencode('.jpg', enhanced);
-        const pdfImage = await pdfDoc.embedJpg(imageBuffer);
+        const processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+        const pdfImage = await pdfDoc.embedJpg(processedBuffer);
 
         const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
         page.drawImage(pdfImage, {
@@ -95,13 +55,11 @@ async function createScannedPDF(images, outputPath) {
             width: pdfImage.width,
             height: pdfImage.height
         });
-
-        console.log(`✅ Gambar diproses ${warped ? '(dengan transformasi)' : '(tanpa transformasi)'}`);
     }
 
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-    console.log(`📄 PDF berhasil dibuat: ${outputPath}`);
+    console.log('PDF selesai dibuat, disimpan ke: ' + outputPath);
 }
 
 //database
