@@ -35,44 +35,54 @@ async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
     for (let imgPath of images) {
-        // Baca gambar dengan OpenCV
-        let mat = cv.imread(imgPath);
+        try {
+            // Baca gambar
+            let mat = cv.imread(imgPath);
 
-        // Ubah ke grayscale
-        let gray = mat.bgrToGray();
+            // Ubah ke grayscale
+            let gray = mat.bgrToGray();
 
-        // Adaptive threshold agar hasil jadi hitam-putih bersih
-        let thresholded = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv.THRESH_BINARY, 15, 3);  // Meningkatkan kernel size untuk hasil lebih baik
+            // Blur untuk mengurangi noise
+            let blurred = gray.gaussianBlur(new cv.Size(5, 5), 1.5);
 
-        // Simpan sementara sebagai PNG (lebih baik daripada JPG untuk kualitas gambar)
-        const tempPath = path.join(__dirname, `temp_${Date.now()}.png`);
-        cv.imwrite(tempPath, thresholded);
+            // Adaptive Threshold (putih-hitam)
+            let thresholded = blurred.adaptiveThreshold(
+                255,
+                cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv.THRESH_BINARY,
+                21,   // blockSize: harus ganjil dan > 1
+                10    // C: nilai penyesuaian threshold
+            );
 
-        // Embed ke PDF pakai pdf-lib
-        const imageBuffer = fs.readFileSync(tempPath);
-        const pdfImage = await pdfDoc.embedPng(imageBuffer);  // Gunakan PNG untuk kualitas lebih baik
+            // Simpan sementara sebagai PNG
+            const tempPath = path.join(__dirname, `temp_${Date.now()}.png`);
+            cv.imwrite(tempPath, thresholded);
 
-        // Ukuran halaman PDF disesuaikan dengan ukuran gambar
-        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+            // Baca gambar dan embed ke PDF
+            const imageBuffer = fs.readFileSync(tempPath);
+            const pdfImage = await pdfDoc.embedPng(imageBuffer);
 
-        page.drawImage(pdfImage, {
-            x: 0,
-            y: 0,
-            width: pdfImage.width,
-            height: pdfImage.height
-        });
+            // Tambahkan halaman
+            const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+            page.drawImage(pdfImage, {
+                x: 0,
+                y: 0,
+                width: pdfImage.width,
+                height: pdfImage.height
+            });
 
-        // Hapus file sementara
-        fs.unlinkSync(tempPath);
+            // Hapus file sementara
+            fs.unlinkSync(tempPath);
+        } catch (error) {
+            console.error(`Gagal memproses ${imgPath}:`, error);
+        }
     }
 
     // Simpan PDF ke outputPath
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-    console.log(`PDF selesai dibuat di ${outputPath}`);
+    console.log(`✅ PDF selesai dibuat di ${outputPath}`);
 }
-
 
 //database
 let premium = JSON.parse(fs.readFileSync('./database/premium.json'))
