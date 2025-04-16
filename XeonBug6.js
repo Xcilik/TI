@@ -32,58 +32,70 @@ global.userSessions = global.userSessions || {};
 
 
 
+function orderPoints(pts) {
+    // Ubah ke array [x, y]
+    const sorted = pts.map(p => [p.x, p.y]);
+
+    // Urutkan berdasarkan jumlah x + y dan x - y
+    const sum = sorted.map(p => p[0] + p[1]);
+    const diff = sorted.map(p => p[0] - p[1]);
+
+    return [
+        sorted[sum.indexOf(Math.min(...sum))], // top-left
+        sorted[diff.indexOf(Math.min(...diff))], // top-right
+        sorted[sum.indexOf(Math.max(...sum))], // bottom-right
+        sorted[diff.indexOf(Math.max(...diff))] // bottom-left
+    ].map(p => new cv.Point2(p[0], p[1]));
+}
+
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
 
     for (const imgPath of images) {
         let mat = cv.imread(imgPath);
 
-        // Resize jika gambar terlalu besar
+        // Resize jika terlalu besar
         if (mat.cols > 1500) {
             mat = mat.resizeToMax(1500);
         }
 
-        // Preprocessing
         const gray = mat.bgrToGray();
         const blurred = gray.gaussianBlur(new cv.Size(5, 5), 0);
         const edged = blurred.canny(75, 200);
 
-        // Cari kontur
         const contours = edged.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-        const sorted = contours.sort((c1, c2) => c2.area - c1.area);
+        const sorted = contours.sort((a, b) => b.area - a.area);
 
         let docContour = null;
-        for (let c of sorted) {
+
+        for (const c of sorted) {
             const peri = c.arcLength(true);
             const approx = c.approxPolyDP(0.02 * peri, true);
             if (approx.length === 4) {
-                docContour = approx;
+                docContour = approx.getDataAsArray(); // ← di sini perbaikan utamanya
                 break;
             }
         }
 
         if (docContour) {
-            // Transformasi perspektif
-            const srcPts = docContour.getPoints();
+            const ordered = orderPoints(docContour);
             const dstPts = [
                 new cv.Point2(0, 0),
                 new cv.Point2(595, 0),
                 new cv.Point2(595, 842),
                 new cv.Point2(0, 842)
             ];
-            const M = cv.getPerspectiveTransform(srcPts, dstPts);
+            const M = cv.getPerspectiveTransform(ordered, dstPts);
             mat = mat.warpPerspective(M, new cv.Size(595, 842));
         }
 
-        // Enhance hasil akhir
         const finalGray = mat.bgrToGray();
-        const contrast = finalGray.equalizeHist(); // boosting kontras
+        const contrast = finalGray.equalizeHist(); // memperjelas detail
         const thresholded = contrast.adaptiveThreshold(
             255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv.THRESH_BINARY, 15, 10
         );
 
-        // Encode langsung ke buffer (tanpa simpan file)
         const imageBuffer = cv.imencode('.jpg', thresholded);
 
         const pdfImage = await pdfDoc.embedJpg(imageBuffer);
@@ -99,7 +111,7 @@ async function createScannedPDF(images, outputPath) {
 
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-    console.log(`PDF selesai dibuat di ${outputPath}`);
+    console.log(`✅ PDF selesai dibuat di ${outputPath}`);
 }
 //bug databas
 
