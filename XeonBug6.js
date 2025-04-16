@@ -30,18 +30,16 @@ const cv = require('opencv4nodejs-prebuilt-install');
 global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
+
+// Fungsi untuk urutkan 4 titik dokumen (atas kiri, atas kanan, bawah kanan, bawah kiri)
 function orderPoints(pts) {
-    const sorted = pts.map(p => [p.x, p.y]);
-
-    const sum = sorted.map(p => p[0] + p[1]);
-    const diff = sorted.map(p => p[0] - p[1]);
-
-    return [
-        sorted[sum.indexOf(Math.min(...sum))],     // top-left
-        sorted[diff.indexOf(Math.min(...diff))],   // top-right
-        sorted[sum.indexOf(Math.max(...sum))],     // bottom-right
-        sorted[diff.indexOf(Math.max(...diff))],   // bottom-left
-    ].map(p => new cv.Point2(p[0], p[1]));
+    const [tl, tr, br, bl] = (() => {
+        const sorted = pts.sort((a, b) => a.y - b.y);
+        const top = sorted.slice(0, 2).sort((a, b) => a.x - b.x);
+        const bottom = sorted.slice(2, 4).sort((a, b) => a.x - b.x);
+        return [top[0], top[1], bottom[1], bottom[0]];
+    })();
+    return [tl, tr, br, bl];
 }
 
 async function createScannedPDF(images, outputPath) {
@@ -49,11 +47,7 @@ async function createScannedPDF(images, outputPath) {
 
     for (const imgPath of images) {
         let mat = cv.imread(imgPath);
-
-        // Resize jika terlalu besar
-        if (mat.cols > 1500) {
-            mat = mat.resizeToMax(1500);
-        }
+        if (mat.cols > 1500) mat = mat.resizeToMax(1500);
 
         const gray = mat.bgrToGray();
         const blurred = gray.gaussianBlur(new cv.Size(5, 5), 0);
@@ -62,52 +56,54 @@ async function createScannedPDF(images, outputPath) {
         const contours = edged.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
         const sorted = contours.sort((a, b) => b.area - a.area);
 
-        let docContour = null;
+        let transformed = mat;
+        let warped = false;
 
         for (const c of sorted) {
             const peri = c.arcLength(true);
             const approx = c.approxPolyDP(0.02 * peri, true);
             if (approx.length === 4) {
-                docContour = approx; // FIXED: langsung pakai array
+                const pts = orderPoints(approx);
+                const width = 800;
+                const height = 1000;
+                const dst = [
+                    new cv.Point2(0, 0),
+                    new cv.Point2(width - 1, 0),
+                    new cv.Point2(width - 1, height - 1),
+                    new cv.Point2(0, height - 1)
+                ];
+                const M = cv.getPerspectiveTransform(pts, dst);
+                transformed = mat.warpPerspective(M, new cv.Size(width, height));
+                warped = true;
                 break;
             }
         }
 
-        if (docContour) {
-            const ordered = orderPoints(docContour);
-            const dstPts = [
-                new cv.Point2(0, 0),
-                new cv.Point2(595, 0),
-                new cv.Point2(595, 842),
-                new cv.Point2(0, 842)
-            ];
-            const M = cv.getPerspectiveTransform(ordered, dstPts);
-            mat = mat.warpPerspective(M, new cv.Size(595, 842));
-        }
+        // Enhance hasil akhir
+        const enhanced = transformed.bgrToGray()
+            .gaussianBlur(new cv.Size(3, 3), 0)
+            .equalizeHist()
+            .adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 15, 10);
 
-        const finalGray = mat.bgrToGray();
-        const contrast = finalGray.equalizeHist();
-        const thresholded = contrast.adaptiveThreshold(
-            255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv.THRESH_BINARY, 15, 10
-        );
-
-        const imageBuffer = cv.imencode('.jpg', thresholded);
+        const imageBuffer = cv.imencode('.jpg', enhanced);
         const pdfImage = await pdfDoc.embedJpg(imageBuffer);
-        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
 
+        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
         page.drawImage(pdfImage, {
             x: 0,
             y: 0,
             width: pdfImage.width,
             height: pdfImage.height
         });
+
+        console.log(`✅ Gambar diproses ${warped ? '(dengan transformasi)' : '(tanpa transformasi)'}`);
     }
 
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-    console.log(`✅ PDF selesai dibuat di ${outputPath}`);
+    console.log(`📄 PDF berhasil dibuat: ${outputPath}`);
 }
+
 //database
 let premium = JSON.parse(fs.readFileSync('./database/premium.json'))
 let _owner = JSON.parse(fs.readFileSync('./database/owner.json'))
