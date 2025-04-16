@@ -158,7 +158,7 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
-        if (userSessions[m.sender]?.collecting && m.mtype == 'imageMessage') {
+        if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
             console.log("Menerima gambar...");  // Menambahkan log
 
             try {
@@ -231,24 +231,29 @@ mentionedJid:[sender]}},
                     quoted: m
                 })
                 break
-
             case 'buatpdf': {
                 console.log("cmd buatpdf...");  // Menambahkan log
-
+            
+                // Memastikan perintah hanya dijalankan jika bukan pesan di grup
                 if (!m.isGroup) {
+                    // Memeriksa apakah pengguna sudah memiliki sesi pengumpulan gambar
                     if (!userSessions[m.sender]) {
+                        // Jika belum ada sesi, buat sesi baru dan beri instruksi
                         userSessions[m.sender] = {
-                            images: [],
-                            collecting: true
-                            }
-                        replygcxeon('Kirimkan gambar yang ingin kamu jadikan PDF. Jika sudah selesai, ketik *selesai* untuk memproses.')
+                            images: [],  // Array untuk menampung gambar
+                            collecting: true  // Menandakan bahwa sesi pengumpulan gambar dimulai
+                        };
+            
+                        // Mengirim pesan instruksi kepada pengguna
+                        replygcxeon('Kirimkan gambar yang ingin kamu jadikan PDF. Jika sudah selesai, ketik *selesai* untuk memproses.');
                     } else {
-                        replygcxeon('Kamu masih dalam sesi. Kirim *selesai* jika sudah mengirim semua gambar.')
-                    }
+                        // Jika pengguna sudah dalam sesi, beri tahu mereka untuk mengirim "selesai"
+                        replygcxeon('Kamu masih dalam sesi. Kirim *selesai* jika sudah mengirim semua gambar.');
                     }
                 }
-                break
-    
+            }
+            break;
+
                         
             case 'swm': case 'steal': case 'stickerwm': case 'take':{
                 if (!args.join(" ")) return replygcxeon(`Where is the text?`)
