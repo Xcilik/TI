@@ -30,27 +30,31 @@ const cv = require('opencv4nodejs-prebuilt-install');
 global.userSessions = global.userSessions || {};
 
 // Fungsi untuk mengurutkan 4 titik agar transformasi presisi
-
 async function askOpenRouter(prompt) {
     const apiKey = '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';
     const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
 
     try {
-        const res = await axios.post(endpoint, {
+        const response = await axios.post(endpoint, {
             model: 'mistral/mistral-7b-instruct', // model gratis
             messages: [{ role: "user", content: prompt }]
         }, {
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'HTTP-Referer': 'https://wa.me', // Optional, kadang dibutuhkan OpenRouter
             }
         });
 
-        return res.data.choices?.[0]?.message?.content || 'Gagal menjawab.';
+        const reply = response.data.choices?.[0]?.message?.content;
+        return reply?.trim() || 'Gagal menjawab (kosong).';
+
     } catch (e) {
+        console.error('[OpenRouter Error]', e?.response?.data || e?.message);
         return 'Gagal konek ke OpenRouter.';
     }
 }
+
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create();
