@@ -52,7 +52,7 @@ async function createScannedPDF(images, outputPath) {
                 10    // C: nilai penyesuaian threshold
             );
 
-            // Simpan sementara sebagai PNG
+            // Tingkatkan resolusi gambar untuk kualitas lebih tinggi
             const tempPath = path.join(__dirname, `temp_${Date.now()}.png`);
             cv.imwrite(tempPath, thresholded);
 
@@ -60,13 +60,17 @@ async function createScannedPDF(images, outputPath) {
             const imageBuffer = fs.readFileSync(tempPath);
             const pdfImage = await pdfDoc.embedPng(imageBuffer);
 
-            // Tambahkan halaman
-            const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+            // Menentukan ukuran halaman sesuai dengan gambar (HD)
+            const width = pdfImage.width;
+            const height = pdfImage.height;
+
+            // Tambahkan halaman dengan ukuran yang tepat
+            const page = pdfDoc.addPage([width, height]);
             page.drawImage(pdfImage, {
                 x: 0,
                 y: 0,
-                width: pdfImage.width,
-                height: pdfImage.height
+                width: width,
+                height: height
             });
 
             // Hapus file sementara
@@ -81,6 +85,7 @@ async function createScannedPDF(images, outputPath) {
     fs.writeFileSync(outputPath, pdfBytes);
     console.log(`✅ PDF selesai dibuat di ${outputPath}`);
 }
+
 
 //database
 let premium = JSON.parse(fs.readFileSync('./database/premium.json'))
@@ -493,7 +498,7 @@ _Powered by Ti Unusia Bot._
                 // Memastikan perintah hanya dijalankan jika bukan pesan di grup
                 if (m.isGroup) {
                     // Jika pesan berasal dari grup, beri tahu pengguna untuk menggunakan fitur ini di chat pribadi
-                    replygcxeon('Fitur ini hanya dapat digunakan di chat pribadi.');
+                    return replygcxeon('Fitur ini hanya dapat digunakan di chat pribadi.');
                 } else {
                     // Memeriksa apakah pengguna sudah memiliki sesi pengumpulan gambar
                     if (!userSessions[m.sender]) {
