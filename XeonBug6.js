@@ -24,7 +24,6 @@ const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 
 const { PDFDocument } = require('pdf-lib')
 const Jimp = require('jimp')
-const fs = require('fs')
 
 async function createScannedPDF(images, outputPath) {
     const pdfDoc = await PDFDocument.create()
