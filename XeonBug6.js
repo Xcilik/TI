@@ -22,6 +22,41 @@ let afk = require("./lib/afk");
 const { addPremiumUser, getPremiumExpired, getPremiumPosition, expiredCheck, checkPremiumUser, getAllPremiumUser } = require('./lib/premiun')
 const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 
+const { PDFDocument } = require('pdf-lib')
+const Jimp = require('jimp')
+const fs = require('fs')
+
+async function createScannedPDF(images, outputPath) {
+    const pdfDoc = await PDFDocument.create()
+
+    for (let imgPath of images) {
+        let image = await Jimp.read(imgPath)
+
+        // Proses seperti CamScanner
+        image
+            .greyscale()
+            .contrast(1)
+            .brightness(0.1)
+            .normalize()
+            .quality(80)
+
+        let processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
+        const pdfImage = await pdfDoc.embedJpg(processedBuffer)
+
+        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height])
+        page.drawImage(pdfImage, {
+            x: 0,
+            y: 0,
+            width: pdfImage.width,
+            height: pdfImage.height
+        })
+    }
+
+    const pdfBytes = await pdfDoc.save()
+    fs.writeFileSync(outputPath, pdfBytes)
+}
+
+
 //bug databas
 
 //database
@@ -96,6 +131,7 @@ module.exports = XeonBotInc = async (XeonBotInc, m, msg, chatUpdate, store) => {
         expiredCheck(XeonBotInc, m, premium);
 //group chat msg by xeon
 
+const userSessions = {}
 
 const replygcxeon = (teks) => {
 XeonBotInc.sendMessage(m.chat,
@@ -145,6 +181,52 @@ mentionedJid:[sender]}},
                     quoted: m
                 })
                 break
+
+           case 'buatpdf': {
+                if (!m.isGroup) {
+                    if (!userSessions[m.sender]) {
+                        userSessions[m.sender] = {
+                            images: [],
+                            collecting: true
+                            }
+                        replygcxeon('Kirimkan gambar yang ingin kamu jadikan PDF. Jika sudah selesai, ketik *selesai* untuk memproses.')
+                    } else {
+                        replygcxeon('Kamu masih dalam sesi. Kirim *selesai* jika sudah mengirim semua gambar.')
+                    }
+                    }
+                }
+                break
+                
+                // Tangani gambar yang dikirim saat sesi aktif
+                if (userSessions[m.sender]?.collecting && m.mimetype?.includes('image')) {
+                    let media = await XeonBotInc.downloadMediaMessage(m)
+                    let filename = `./temp/${m.sender}_${Date.now()}.jpg`
+                    fs.writeFileSync(filename, media)
+                
+                    userSessions[m.sender].images.push(filename)
+                    replygcxeon(`Gambar diterima. Total: ${userSessions[m.sender].images.length} gambar.`)
+                }
+                
+                // Tangani command 'selesai'
+                if (body === 'selesai' && userSessions[m.sender]?.collecting) {
+                    userSessions[m.sender].collecting = false
+                    replygcxeon('Memproses gambar menjadi PDF...')
+                
+                    let pdfPath = `./temp/${m.sender}_output.pdf`
+                    await createScannedPDF(userSessions[m.sender].images, pdfPath)
+                
+                    let buffer = fs.readFileSync(pdfPath)
+                    XeonBotInc.sendMessage(m.chat, {
+                        document: buffer,
+                        fileName: 'HasilScan.pdf',
+                        mimetype: 'application/pdf'
+                    }, { quoted: m })
+                
+                    // Bersihkan file
+                    for (let img of userSessions[m.sender].images) fs.unlinkSync(img)
+                    fs.unlinkSync(pdfPath)
+                    delete userSessions[m.sender]
+                }
                         
             case 'swm': case 'steal': case 'stickerwm': case 'take':{
                 if (!args.join(" ")) return replygcxeon(`Where is the text?`)
