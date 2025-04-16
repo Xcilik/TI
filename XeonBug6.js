@@ -179,14 +179,13 @@ mentionedJid:[sender]}},
             
         
 // Tangkap dan simpan gambar jika user dalam sesi 'buatpdf'
+// Ketika menerima gambar
         if (
             m.mtype === 'imageMessage' &&
             userSessions[m.sender] &&
             userSessions[m.sender].collecting
         ) {
             console.log("Menerima gambar...");
-            console.log("Isi pesan:", m);
-        
             try {
                 if (!fs.existsSync('./temp')) fs.mkdirSync('./temp');
         
@@ -208,31 +207,41 @@ mentionedJid:[sender]}},
             }
         }
         
-        // Proses PDF saat user mengetik 'selesai'
+        // Jika user mengetik "selesai"
         if (body.toLowerCase() === 'selesai' && userSessions[m.sender]?.collecting) {
-            console.log('Perintah selesai diterima'); // Tambahkan log ini untuk memeriksa
-        
             if (userSessions[m.sender].images.length === 0) {
                 return replygcxeon('⚠️ Belum ada gambar yang dikirim.');
             }
         
-            userSessions[m.sender].collecting = false; // Menandakan pengumpulan gambar selesai
-            replygcxeon('📄 Sedang membuat file PDF, mohon tunggu...');
+            userSessions[m.sender].collecting = false;
+            userSessions[m.sender].awaitingFileName = true;
+            return replygcxeon('📝 Masukkan nama file PDF yang diinginkan (tanpa spasi, tanpa .pdf)');
+        }
         
-            const outputPdf = `./temp/${m.sender}_hasil.pdf`; // Menentukan path output PDF
-            await createScannedPDF(userSessions[m.sender].images, outputPdf); // Membuat PDF
+        // Setelah itu user akan mengirim nama file
+        if (userSessions[m.sender]?.awaitingFileName) {
+            const fileNameRaw = body.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+            if (!fileNameRaw) return replygcxeon('⚠️ Nama file tidak valid. Coba lagi.');
         
-            const buffer = fs.readFileSync(outputPdf); // Membaca file PDF
-            XeonBotInc.sendMessage(m.chat, {
+            const fileName = `${fileNameRaw}.pdf`;
+            const outputPdf = `./temp/${fileName}`;
+            replygcxeon(`📄 Membuat file PDF: *${fileName}*, mohon tunggu...`);
+        
+            await createScannedPDF(userSessions[m.sender].images, outputPdf);
+        
+            const buffer = fs.readFileSync(outputPdf);
+            await XeonBotInc.sendMessage(m.chat, {
                 document: buffer,
                 mimetype: 'application/pdf',
-                fileName: 'Scan_Hasil.pdf'
+                fileName: fileName
             }, { quoted: m });
         
-            // Menghapus file sementara setelah dikirim
+            // Hapus file sementara
             for (let file of userSessions[m.sender].images) fs.unlinkSync(file);
-            fs.unlinkSync(outputPdf); // Menghapus file PDF yang sudah dibuat
-            delete userSessions[m.sender]; // Menghapus sesi pengumpulan gambar
+            fs.unlinkSync(outputPdf);
+            delete userSessions[m.sender];
+        
+            return replygcxeon(`✅ PDF berhasil dikirim sebagai *${fileName}*`);
         }
 
 
