@@ -35,19 +35,18 @@ async function createScannedPDF(images, outputPath) {
     for (let imgPath of images) {
         let image = await Jimp.read(imgPath);
 
-        // Proses gambar seperti di CamScanner
+        // Proses mirip CamScanner: tingkatkan kualitas teks & hilangkan bayangan
         image
-            .greyscale()
-            .brightness(0.2)
-            .contrast(0.3)
-            .threshold({ max: 200 })  // Ubah nilai ini sesuai pencahayaan gambar kamu
-            .quality(80);
-    // Mengurangi kualitas gambar untuk kompresi
+            .greyscale()                // Ubah ke grayscale
+            .contrast(1)                // Tingkatkan kontras maksimal
+            .brightness(0.4)            // Cerahkan sedikit
+            .normalize()                // Normalisasi histogram
+            .posterize(2)               // Kurangi ke 2 level warna (hitam/putih)
+            .blur(1);                   // Sedikit blur untuk menghaluskan tepi kasar
 
-        let processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+        const processedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
         const pdfImage = await pdfDoc.embedJpg(processedBuffer);
 
-        // Menambahkan halaman dengan ukuran gambar
         const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
         page.drawImage(pdfImage, {
             x: 0,
@@ -57,12 +56,10 @@ async function createScannedPDF(images, outputPath) {
         });
     }
 
-    // Menyimpan file PDF
     const pdfBytes = await pdfDoc.save();
-    console.log('PDF selesai dibuat, menyimpan ke ' + outputPath); // Tambahkan log
     fs.writeFileSync(outputPath, pdfBytes);
+    console.log('PDF selesai dibuat, disimpan ke: ' + outputPath);
 }
-
 
 
 //bug databas
