@@ -281,6 +281,7 @@ mentionedJid:[sender]}},
 *🔗 linkgrup* - Mendapatkan link undangan grup
 *📥 hidetag* - Mengirim pesan dengan menyembunyikan siapa saja yang ditandai
 
+
 *📚 Konversi Media:*
 *📷 toimage* - Mengonversi stiker menjadi gambar
 *📹 tovideo* - Mengonversi stiker menjadi video
@@ -291,18 +292,33 @@ mentionedJid:[sender]}},
 *🖼️ tikel* - Mengonversi image/video menjadi stiker
 *🔗 tourl* - Mengonversi media menjadi URL (image/video)
 
+
 *📝 Pembuat Konten:*
 *📄 buatpdf* - Mengumpulkan gambar untuk membuat PDF
 *🎨 stickerwm* - Menambahkan watermark pada stiker
 *🖼️ tikel* - Mengonversi gambar/video menjadi stiker
 
+
 _Powered by Ti Unusia Bot._       
-                `;
-                XeonBotInc.sendMessage(m.chat, {
-                    text: menu
-                }, {
-                    quoted: m
-                });
+        `;
+        
+                const button = [
+                    {
+                        buttonId: 'ti_bot',
+                        buttonText: { displayText: 'Ti Bot' },
+                        type: 1
+                    }
+                ];
+                
+                const buttonMessage = {
+                    text: menu,
+                    footer: 'Ti Unusia Bot',
+                    buttons: button,
+                    headerType: 1
+                };
+        
+                XeonBotInc.sendMessage(m.chat, buttonMessage, { quoted: m });
+            }
             }
             break
             case 'addmember':
