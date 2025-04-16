@@ -267,22 +267,36 @@ mentionedJid:[sender]}},
             case 'menu': {
                 const menu = `
 *🚀 Daftar Perintah Ti Unusia Bot:*
-            
+
+*📤 Pengelolaan Grup:*
 *⚡ kick* - Mengeluarkan anggota dari grup
 *🗣️ tagall* - Menandai semua anggota grup
-*📄 buatpdf* - Mengumpulkan gambar untuk membuat PDF
-*🎨 stickerwm* - Menambahkan watermark pada stiker
+*👤 addmember* - Menambahkan anggota ke grup
+*🔒 promote* - Meningkatkan status anggota menjadi admin
+*⬇️ demote* - Menurunkan status admin anggota
+*📛 setname* - Mengubah nama grup
+*📝 setdesc* - Mengubah deskripsi grup
+*📸 setppgroup* - Mengubah foto profil grup
+*🔒 modegrup* - Mengubah pengaturan grup (open/close)
+*🔗 linkgrup* - Mendapatkan link undangan grup
+*📥 hidetag* - Mengirim pesan dengan menyembunyikan siapa saja yang ditandai
+
+*📚 Konversi Media:*
 *📷 toimage* - Mengonversi stiker menjadi gambar
-*📹 tomp4* - Mengonversi stiker menjadi video
+*📹 tovideo* - Mengonversi stiker menjadi video
 *🎵 toaudio* - Mengonversi video atau audio menjadi audio
 *📂 tomp3* - Mengonversi video atau audio menjadi MP3
 *📞 tovn* - Mengonversi audio atau video menjadi voice note (VN)
 *🎞️ togif* - Mengonversi stiker menjadi GIF
+*🖼️ tikel* - Mengonversi image/video menjadi stiker
 *🔗 tourl* - Mengonversi media menjadi URL (image/video)
-*🖼️ sticker* - Mengonversi image/video menjadi stiker
 
+*📝 Pembuat Konten:*
+*📄 buatpdf* - Mengumpulkan gambar untuk membuat PDF
+*🎨 stickerwm* - Menambahkan watermark pada stiker
+*🖼️ tikel* - Mengonversi gambar/video menjadi stiker
 
-_Powered by Ti Unusia Bot._            
+_Powered by Ti Unusia Bot._       
                 `;
                 XeonBotInc.sendMessage(m.chat, {
                     text: menu
@@ -291,7 +305,7 @@ _Powered by Ti Unusia Bot._
                 });
             }
             break
-            case 'add':
+            case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
                 if (!isBotAdmins) return replygcxeon(mess.botAdmin);
@@ -299,11 +313,13 @@ _Powered by Ti Unusia Bot._
                 let addMember = m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
                 
                 if (!addMember || addMember === '@s.whatsapp.net') {
-                    return replygcxeon("Tolong sebutkan nomor atau reply pesan untuk menambahkan anggota.");
+                    return replygcxeon("Penggunaan: *addmember* nomor\nContoh: *addmember* 6289612345678");
                 }
             
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [addMember], 'add')
-                    .then((res) => replygcxeon(json(res)))
+                    .then((res) => {
+                        replygcxeon(`✅ Berhasil, ${addMember} berhasil ditambahkan ke grup.`);
+                    })
                     .catch((err) => replygcxeon(json(err)));
                 break;
             
@@ -315,11 +331,13 @@ _Powered by Ti Unusia Bot._
                 let promoteMember = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
                 
                 if (!promoteMember || promoteMember === '@s.whatsapp.net') {
-                    return replygcxeon("Tolong sebutkan nomor atau reply pesan untuk mempromosikan anggota.");
+                    return replygcxeon("Penggunaan: *promote* balas ke user/nomor/tag user.");
                 }
             
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [promoteMember], 'promote')
-                    .then((res) => replygcxeon(json(res)))
+                    .then((res) => {
+                        replygcxeon(`✅ Berhasil, ${promoteMember} berhasil dijadikan admin.`);
+                    })
                     .catch((err) => replygcxeon(json(err)));
                 break;
             
@@ -331,124 +349,128 @@ _Powered by Ti Unusia Bot._
                 let demoteMember = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
                 
                 if (!demoteMember || demoteMember === '@s.whatsapp.net') {
-                    return replygcxeon("Tolong sebutkan nomor atau reply pesan untuk menurunkan status anggota.");
+                    return replygcxeon("Penggunaan: *demote* balas ke user/nomor/tag user.");
                 }
             
                 await XeonBotInc.groupParticipantsUpdate(m.chat, [demoteMember], 'demote')
-                    .then((res) => replygcxeon(json(res)))
+                    .then((res) => {
+                        replygcxeon(`✅ Berhasil, ${demoteMember} berhasil diturunkan admin.`);
+                    })
                     .catch((err) => replygcxeon(json(err)));
                 break;
-            case 'setname':
-            case 'setsubject':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (!text) return 'Text ?'
-                await XeonBotInc.groupUpdateSubject(m.chat, text).then((res) => replygcxeon(mess.success)).catch((err) => replygcxeon(json(err)))
-                break
-            case 'setdesc':
-            case 'setdesk':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (!text) return 'Text ?'
-                await XeonBotInc.groupUpdateDescription(m.chat, text).then((res) => replygcxeon(mess.success)).catch((err) => replygcxeon(json(err)))
-                break
-            case 'setppgroup':
-            case 'setppgrup':
-            case 'setppgc':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (!quoted) return replygcxeon(`Send/Reply Image With Caption ${prefix + command}`)
-                if (!/image/.test(mime)) return replygcxeon(`Send/Reply Image With Caption ${prefix + command}`)
-                if (/webp/.test(mime)) return replygcxeon(`Send/Reply Image With Caption ${prefix + command}`)
-                var medis = await XeonBotInc.downloadAndSaveMediaMessage(quoted, 'ppbot.jpeg')
-                if (args[0] == 'full') {
-                    var {
-                        img
-                    } = await generateProfilePicture(medis)
-                    await XeonBotInc.query({
-                        tag: 'iq',
-                        attrs: {
-                            to: m.chat,
-                            type: 'set',
-                            xmlns: 'w:profile:picture'
-                        },
-                        content: [{
-                            tag: 'picture',
+
+                case 'setname':
+                case 'setsubject':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    if (!text) return replygcxeon('Penggunaan: *setname* nama grup.')
+                    await XeonBotInc.groupUpdateSubject(m.chat, text)
+                        .then((res) => replygcxeon(`✅ Berhasil, nama grup telah diubah menjadi: ${text}`))
+                        .catch((err) => replygcxeon(json(err)))
+                    break
+                
+                case 'setdesc':
+                case 'setdesk':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    if (!text) return replygcxeon('Penggunaan: *setdesc* deskripsi grup.')
+                    await XeonBotInc.groupUpdateDescription(m.chat, text)
+                        .then((res) => replygcxeon(`✅ Berhasil, deskripsi grup telah diubah menjadi: ${text}`))
+                        .catch((err) => replygcxeon(json(err)))
+                    break
+                
+                case 'setppgroup':
+                case 'setppgrup':
+                case 'setppgc':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    if (!quoted) return replygcxeon(`Tolong kirim/reply gambar dengan caption ${prefix + command}`)
+                    if (!/image/.test(mime)) return replygcxeon(`Tolong kirim/reply gambar dengan caption ${prefix + command}`)
+                    if (/webp/.test(mime)) return replygcxeon(`Tolong kirim/reply gambar dengan caption ${prefix + command}`)
+                    var medis = await XeonBotInc.downloadAndSaveMediaMessage(quoted, 'ppbot.jpeg')
+                    if (args[0] == 'full') {
+                        var { img } = await generateProfilePicture(medis)
+                        await XeonBotInc.query({
+                            tag: 'iq',
                             attrs: {
-                                type: 'image'
+                                to: m.chat,
+                                type: 'set',
+                                xmlns: 'w:profile:picture'
                             },
-                            content: img
-                        }]
+                            content: [{
+                                tag: 'picture',
+                                attrs: { type: 'image' },
+                                content: img
+                            }]
+                        })
+                        fs.unlinkSync(medis)
+                        replygcxeon('✅ Berhasil, foto profil grup telah diubah.')
+                    } else {
+                        var memeg = await XeonBotInc.updateProfilePicture(m.chat, { url: medis })
+                        fs.unlinkSync(medis)
+                        replygcxeon('✅ Berhasil, foto profil grup telah diubah.')
+                    }
+                    break
+                
+                case 'hidetag':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    XeonBotInc.sendMessage(m.chat, {
+                        text: q ? q : '',
+                        mentions: participants.map(a => a.id)
+                    }, {
+                        quoted: m
                     })
-                    fs.unlinkSync(medis)
-                    replygcxeon(mess.done)
-                } else {
-                    var memeg = await XeonBotInc.updateProfilePicture(m.chat, {
-                        url: medis
+                    break
+                
+                case 'modegrup':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    if (args[0] === 'close') {
+                        await XeonBotInc.groupSettingUpdate(m.chat, 'announcement')
+                            .then((res) => replygcxeon(`✅ Berhasil menutup grup. Hanya admin yang bisa mengirim pesan.`))
+                            .catch((err) => replygcxeon(json(err)))
+                    } else if (args[0] === 'open') {
+                        await XeonBotInc.groupSettingUpdate(m.chat, 'not_announcement')
+                            .then((res) => replygcxeon(`Berhasil membuka grup. Semua orang bisa mengirim pesan.`))
+                            .catch((err) => replygcxeon(json(err)))
+                    } else {
+                        replygcxeon(`Penggunaan: *modegrup* open/close.`)
+                    }
+                    break
+            
+                
+                case 'linkgroup':
+                case 'grouplink':
+                case 'linkgrup':
+                case 'linkgc':
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)
+                    let response = await XeonBotInc.groupInviteCode(m.chat)
+                    XeonBotInc.sendText(m.chat, `👥 *GROUP LINK INFO*\n📛 *Name :* ${groupMetadata.subject}\n👤 *Group Owner :* ${groupMetadata.owner !== undefined ? '@' + groupMetadata.owner.split`@`[0] : 'Not known'}\n🌱 *ID :* ${groupMetadata.id}\n🔗 *Chat Link :* https://chat.whatsapp.com/${response}\n👥 *Member :* ${groupMetadata.participants.length}\n`, m, {
+                        detectLink: true
                     })
-                    fs.unlinkSync(medis)
-                    replygcxeon(mess.done)
-                }
-                break
-            case 'hidetag':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                XeonBotInc.sendMessage(m.chat, {
-                    text: q ? q : '',
-                    mentions: participants.map(a => a.id)
-                }, {
-                    quoted: m
-                })
-                break
-            case 'group':
-            case 'grup':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (args[0] === 'close') {
-                    await XeonBotInc.groupSettingUpdate(m.chat, 'announcement').then((res) => replygcxeon(`Success In Closing The Group 🕊️`)).catch((err) => replygcxeon(json(err)))
-                } else if (args[0] === 'open') {
-                    await XeonBotInc.groupSettingUpdate(m.chat, 'not_announcement').then((res) => replygcxeon(`Success In Opening The Group 🕊️`)).catch((err) => replygcxeon(json(err)))
-                } else {
-                    replygcxeon(`Mode ${command}\n\n\nType ${prefix + command}open/close`)
-                }
-                break
-            case 'editinfo':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                if (args[0] === 'open') {
-                    await XeonBotInc.groupSettingUpdate(m.chat, 'unlocked').then((res) => replygcxeon(`Successfully Opened Group Edit Info 🕊️`)).catch((err) => replygcxeon(json(err)))
-                } else if (args[0] === 'close') {
-                    await XeonBotInc.groupSettingUpdate(m.chat, 'locked').then((res) => replygcxeon(`Successfully Closed Group Edit Info🕊️`)).catch((err) => replygcxeon(json(err)))
-                } else {
-                    replygcxeon(`Mode ${command}\n\n\nType ${prefix + command}on/off`)
-                }
-                break
-            case 'linkgroup':
-            case 'grouplink':
-            case 'linkgrup':
-            case 'linkgc':
-                if (!m.isGroup) return replygcxeon(mess.group)
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)
-                let response = await XeonBotInc.groupInviteCode(m.chat)
-                XeonBotInc.sendText(m.chat, `👥 *GROUP LINK INFO*\n📛 *Name :* ${groupMetadata.subject}\n👤 *Group Owner :* ${groupMetadata.owner !== undefined ? '@' + groupMetadata.owner.split`@`[0] : 'Not known'}\n🌱 *ID :* ${groupMetadata.id}\n🔗 *Chat Link :* https://chat.whatsapp.com/${response}\n👥 *Member :* ${groupMetadata.participants.length}\n`, m, {
-                    detectLink: true
-                })
-                break                            
-            case 'kick':
-                if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
-                if (!isBotAdmins) return replygcxeon(mess.botAdmin)                        
-                if (!m.isGroup) return replygcxeon(mess.group)
-                let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
-                await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
-                break
-       
+                    break
+                
+                case 'kick':
+                    if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin)
+                    if (!isBotAdmins) return replygcxeon(mess.botAdmin)                        
+                    if (!m.isGroup) return replygcxeon(mess.group)
+                    let blockwww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+                    if (!blockwww || blockwww === text.replace(/[^0-9]/g, '') + '@s.whatsapp.net') {
+                        return replygcxeon("Penggunaan: *kick* balas ke user/nomor/tag user.")
+                    }
+                    await XeonBotInc.groupParticipantsUpdate(m.chat, [blockwww], 'remove')
+                        .then((res) => replygcxeon(`✅ Berhasil, ${blockwww} telah dikeluarkan dari grup.`))
+                        .catch((err) => replygcxeon(json(err)))
+                    break
+
             case 'all':                        
             case 'tagall':
                 if (!m.isGroup) return replygcxeon(mess.group)
@@ -469,7 +491,10 @@ _Powered by Ti Unusia Bot._
                 console.log("cmd buatpdf...");  // Menambahkan log
             
                 // Memastikan perintah hanya dijalankan jika bukan pesan di grup
-                if (!m.isGroup) {
+                if (m.isGroup) {
+                    // Jika pesan berasal dari grup, beri tahu pengguna untuk menggunakan fitur ini di chat pribadi
+                    replygcxeon('Fitur ini hanya dapat digunakan di chat pribadi.');
+                } else {
                     // Memeriksa apakah pengguna sudah memiliki sesi pengumpulan gambar
                     if (!userSessions[m.sender]) {
                         // Jika belum ada sesi, buat sesi baru dan beri instruksi
@@ -487,30 +512,9 @@ _Powered by Ti Unusia Bot._
                 }
             }
             break;
-                        
-            case 'swm': case 'steal': case 'stickerwm': case 'take':{
-                if (!args.join(" ")) return replygcxeon(`Where is the text?`)
-                const swn = args.join(" ")
-                const pcknm = swn.split("|")[0]
-                const atnm = swn.split("|")[1]
-                if (m.quoted.isAnimated === true) {
-                XeonBotInc.downloadAndSaveMediaMessage(quoted, "gifee")
-                XeonBotInc.sendMessage(from, {sticker:fs.readFileSync("gifee.webp")},{quoted:m})
-                } else if (/image/.test(mime)) {
-                let media = await quoted.download()
-                let encmedia = await XeonBotInc.sendImageAsSticker(m.chat, media, m, { packname: pcknm, author: atnm })
-                } else if (/video/.test(mime)) {
-                if ((quoted.msg || quoted).seconds > 11) return replygcxeon('Maximum 10 Seconds!')
-                let media = await quoted.download()
-                let encmedia = await XeonBotInc.sendVideoAsSticker(m.chat, media, m, { packname: pcknm, author: atnm })
-                } else {
-                replygcxeon(`Photo/Video?`)
-                }
-                }
-                break
             case 'toimage':
             case 'toimg': {
-                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
+                if (!/webp/.test(mime)) return replygcxeon(`Penggunaan: *toimage* balas ke pesan gambar.`)
                 replygcxeon(mess.wait)       
                 let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
                 let ran = await getRandom('.png')
@@ -530,7 +534,7 @@ _Powered by Ti Unusia Bot._
             break
             case 'tomp4':
             case 'tovideo': {
-                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
+                if (!/webp/.test(mime)) return replygcxeon(`Penggunaan: *tovideo* balas ke pesan gambar.`)
                 replygcxeon(mess.wait)
                 let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
                 let webpToMp4 = await webp2mp4File(media)
@@ -548,7 +552,7 @@ _Powered by Ti Unusia Bot._
             break
             case 'toaud':
             case 'toaudio': {
-                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Send/Reply Video/Audio that you want to make into audio with caption ${prefix + command}`)
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *toaudio* balas ke pesan video.`)
                 replygcxeon(mess.wait)
                 let media = await XeonBotInc.downloadMediaMessage(qmsg)
                 let audio = await toAudio(media, 'mp4')
@@ -562,7 +566,7 @@ _Powered by Ti Unusia Bot._
             }
             break
             case 'tomp3': {
-                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Send/Reply Video/Audio that you want to make into MP3 with caption ${prefix + command}`)
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *tomp3* balas ke pesan video`)
                 replygcxeon(mess.wait)
                 let media = await XeonBotInc.downloadMediaMessage(qmsg)
                 let audio = await toAudio(media, 'mp4')
@@ -578,7 +582,7 @@ _Powered by Ti Unusia Bot._
             break
             case 'tovn':
             case 'toptt': {
-                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Reply Video/Audio that you want to make into a VN with caption ${prefix + command}`)
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *tovn* balas ke pesan audio/video.`)
                 replygcxeon(mess.wait)
                 let media = await XeonBotInc.downloadMediaMessage(qmsg)
                 let {
@@ -596,24 +600,51 @@ _Powered by Ti Unusia Bot._
             }
             break
             case 'togif': {
-                if (!/webp/.test(mime)) return replygcxeon(`Reply sticker with caption *${prefix + command}*`)
-                replygcxeon(mess.wait)
-                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
-                let webpToMp4 = await webp2mp4File(media)
-                await XeonBotInc.sendMessage(m.chat, {
-                    video: {
-                        url: webpToMp4.result,
-                        caption: 'Convert Webp To Video'
-                    },
-                    gifPlayback: true
-                }, {
-                    quoted: m
-                })
-                await fs.unlinkSync(media)
-
+                if (!qmsg) {
+                    return replygcxeon('Penggunaan: *togif* balas kepesan stiker animasi/video');
+                }
+                if (/webp/.test(mime)) {
+                    replygcxeon(mess.wait)
+                    let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                    // Mengonversi WebP menjadi GIF
+                    let webpToGif = await webp2gifFile(media)
+                    await XeonBotInc.sendMessage(m.chat, {
+                        video: {
+                            url: webpToGif.result,
+                            caption: 'Converted WebP to GIF'
+                        },
+                        gifPlayback: true
+                    }, {
+                        quoted: m
+                    })
+                    await fs.unlinkSync(media)
+                }
+                // Jika media adalah video
+                else if (/video/.test(mime)) {
+                    replygcxeon(mess.wait)
+                    let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
+                    // Mengonversi video menjadi GIF
+                    let videoToGif = await video2gifFile(media)
+                    await XeonBotInc.sendMessage(m.chat, {
+                        video: {
+                            url: videoToGif.result,
+                            caption: 'Converted Video to GIF'
+                        },
+                        gifPlayback: true
+                    }, {
+                        quoted: m
+                    })
+                    await fs.unlinkSync(media)
+                }
+                else {
+                    replygcxeon('Media yang kamu kirim bukan gambar WebP atau video.')
+                }
             }
             break
             case 'tourl': {
+                if (!qmsg) {
+                    return replygcxeon('Penggunaan: *tourl* balas kepesan gambar');
+                }                
                 replygcxeon(mess.wait)
                 let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
                 if (/image/.test(mime)) {
@@ -628,9 +659,8 @@ _Powered by Ti Unusia Bot._
             }
             break                        
             case 'tikel':
-            case 'stiker':
             case 's': {
-                if (!quoted) return replygcxeon(`Reply to Video/Image With Caption ${prefix + command}`)
+                if (!quoted) return replygcxeon(`Penggunaan: *tikel* balas kepesan gambar/video`)
                 if (/image/.test(mime)) {
                     let media = await quoted.download()
                     let encmedia = await XeonBotInc.sendImageAsSticker(m.chat, media, m, {
@@ -647,7 +677,7 @@ _Powered by Ti Unusia Bot._
                     })
                     await fs.unlinkSync(encmedia)
                 } else {
-                    return replygcxeon(`Send Images/Videos With Captions ${prefix + command}\nVideo Duration 1-9 Seconds`)
+                    return replygcxeon(`Penggunaan: *tikel* balas kepesan gambar/video`)
                 }
             }
             break
