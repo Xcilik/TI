@@ -241,7 +241,6 @@ mentionedJid:[sender]}},
             fs.unlinkSync(outputPdf);
             delete userSessions[m.sender];
         
-            return replygcxeon(`✅ PDF berhasil dikirim sebagai *${fileName}*`);
         }
 
 
