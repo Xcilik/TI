@@ -33,7 +33,7 @@ global.userSessions = global.userSessions || {};
 
 
 async function askGemini(prompt) {
-    const apiKey = 'AIzaSyClIEZ1fWS5TBA8L1gbm-AielX2bhhMxCI';
+    const apiKey = 'AIzaSyAix_9WX9p-kNATAeaDI1JpaR-lLNP2qh0';
     const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey;
 
     try {
