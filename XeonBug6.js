@@ -33,21 +33,21 @@ global.userSessions = global.userSessions || {};
 
 
 // file: ask-deepseek.js
+// file: ask-deepseek.js
 const { deepseek } = require('@ai-sdk/deepseek');
-const { generateText } = require('ai');
 
 async function gaschat(prompt) {
   try {
-    const { text } = await generateText({
-      model: deepseek('deepseek-chat'),
-      prompt: prompt,
-    });
+    const { text } = await deepseek('deepseek-chat', prompt);
 
     console.log('Jawaban dari DeepSeek:', text);
   } catch (error) {
     console.error('Terjadi kesalahan:', error);
   }
 }
+
+// Contoh penggunaan
+askDeepseek('Buatkan fungsi JavaScript untuk menghitung jumlah huruf vokal');
 
 // Contoh penggunaan
 
