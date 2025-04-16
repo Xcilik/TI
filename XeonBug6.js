@@ -29,22 +29,18 @@ const cv = require('opencv4nodejs-prebuilt-install');
 
 global.userSessions = global.userSessions || {};
 
-
-
-
+// Fungsi untuk mengurutkan 4 titik agar transformasi presisi
 function orderPoints(pts) {
-    // Ubah ke array [x, y]
     const sorted = pts.map(p => [p.x, p.y]);
 
-    // Urutkan berdasarkan jumlah x + y dan x - y
     const sum = sorted.map(p => p[0] + p[1]);
     const diff = sorted.map(p => p[0] - p[1]);
 
     return [
-        sorted[sum.indexOf(Math.min(...sum))], // top-left
-        sorted[diff.indexOf(Math.min(...diff))], // top-right
-        sorted[sum.indexOf(Math.max(...sum))], // bottom-right
-        sorted[diff.indexOf(Math.max(...diff))] // bottom-left
+        sorted[sum.indexOf(Math.min(...sum))],     // top-left
+        sorted[diff.indexOf(Math.min(...diff))],   // top-right
+        sorted[sum.indexOf(Math.max(...sum))],     // bottom-right
+        sorted[diff.indexOf(Math.max(...diff))],   // bottom-left
     ].map(p => new cv.Point2(p[0], p[1]));
 }
 
@@ -72,7 +68,7 @@ async function createScannedPDF(images, outputPath) {
             const peri = c.arcLength(true);
             const approx = c.approxPolyDP(0.02 * peri, true);
             if (approx.length === 4) {
-                docContour = approx.getDataAsArray(); // ← di sini perbaikan utamanya
+                docContour = approx; // FIXED: langsung pakai array
                 break;
             }
         }
@@ -90,14 +86,13 @@ async function createScannedPDF(images, outputPath) {
         }
 
         const finalGray = mat.bgrToGray();
-        const contrast = finalGray.equalizeHist(); // memperjelas detail
+        const contrast = finalGray.equalizeHist();
         const thresholded = contrast.adaptiveThreshold(
             255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv.THRESH_BINARY, 15, 10
         );
 
         const imageBuffer = cv.imencode('.jpg', thresholded);
-
         const pdfImage = await pdfDoc.embedJpg(imageBuffer);
         const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
 
@@ -113,8 +108,6 @@ async function createScannedPDF(images, outputPath) {
     fs.writeFileSync(outputPath, pdfBytes);
     console.log(`✅ PDF selesai dibuat di ${outputPath}`);
 }
-//bug databas
-
 //database
 let premium = JSON.parse(fs.readFileSync('./database/premium.json'))
 let _owner = JSON.parse(fs.readFileSync('./database/owner.json'))
