@@ -33,25 +33,24 @@ global.userSessions = global.userSessions || {};
 
 
 // Percakapan Tunggal
-const OpenAI = require('openai-free');
-const openai = new OpenAI();
+const { G4F } = require("g4f");
+const g4f = new G4F();
 
 async function gaschat(prompt) {
-    try {
-        const response = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo', // model tetap diperlukan
-            messages: [
-                { role: 'user', content: prompt }
-            ]
-        });
+    const messages = [
+        { role: "user", content: prompt }
+    ];
 
-        return response.choices[0].message.content;
+    try {
+        const response = await g4f.chatCompletion(messages);
+        return response;
     } catch (error) {
-        console.error('Error:', error.message);
+        console.error("G4F Error:", error.message);
         return 'Gagal mendapatkan respons dari AI.';
     }
 }
 
+// Contoh pemanggilan
 
 
 
