@@ -37,55 +37,65 @@ async function createScannedPDF(images, outputPath) {
             // Baca gambar
             let mat = cv.imread(imgPath);
 
+            // Resize gambar biar stabil (opsional, misal ke 2000px lebarnya)
+            const scaleWidth = 2000;
+            const scale = scaleWidth / mat.cols;
+            mat = mat.resize(new cv.Size(0, 0), scale, scale);
+
             // Ubah ke grayscale
             let gray = mat.bgrToGray();
 
-            // Blur untuk mengurangi noise
-            let blurred = gray.gaussianBlur(new cv.Size(5, 5), 1.5);
+            // Tingkatkan kontras
+            let contrasted = new cv.Mat();
+            gray.convertTo(contrasted, -1, 1.5, 0); // alpha = 1.5 (kontras), beta = 0 (brightness)
 
-            // Adaptive Threshold (putih-hitam)
+            // Blur ringan untuk menghilangkan noise kecil
+            let blurred = contrasted.gaussianBlur(new cv.Size(3, 3), 0);
+
+            // Adaptive Threshold (membuat latar belakang putih bersih dan tulisan hitam tebal)
             let thresholded = blurred.adaptiveThreshold(
                 255,
                 cv.ADAPTIVE_THRESH_GAUSSIAN_C,
                 cv.THRESH_BINARY,
-                21,   // blockSize: harus ganjil dan > 1
-                10    // C: nilai penyesuaian threshold
+                15,  // blockSize (lebih kecil = lebih detail)
+                10   // C (menyesuaikan kecerahan)
             );
 
-            // Tingkatkan resolusi gambar untuk kualitas lebih tinggi
+            // Dilate sedikit supaya tulisan lebih tebal
+            let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(1, 1));
+            let dilated = thresholded.dilate(kernel);
+
+            // Simpan hasil sementara
             const tempPath = path.join(__dirname, `temp_${Date.now()}.png`);
-            cv.imwrite(tempPath, thresholded);
+            cv.imwrite(tempPath, dilated);
 
             // Baca gambar dan embed ke PDF
             const imageBuffer = fs.readFileSync(tempPath);
             const pdfImage = await pdfDoc.embedPng(imageBuffer);
 
-            // Menentukan ukuran halaman sesuai dengan gambar (HD)
-            const width = pdfImage.width;
-            const height = pdfImage.height;
-
-            // Tambahkan halaman dengan ukuran yang tepat
+            // Ukuran halaman sesuai gambar
+            const { width, height } = pdfImage;
             const page = pdfDoc.addPage([width, height]);
             page.drawImage(pdfImage, {
                 x: 0,
                 y: 0,
-                width: width,
-                height: height
+                width,
+                height
             });
 
             // Hapus file sementara
             fs.unlinkSync(tempPath);
+
         } catch (error) {
             console.error(`Gagal memproses ${imgPath}:`, error);
         }
     }
 
-    // Simpan PDF ke outputPath
+    // Simpan PDF
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
     console.log(`✅ PDF selesai dibuat di ${outputPath}`);
 }
-
 
 //database
 let premium = JSON.parse(fs.readFileSync('./database/premium.json'))
