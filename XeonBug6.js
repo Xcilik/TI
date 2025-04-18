@@ -311,6 +311,33 @@ _Powered by Ti Unusia Bot._
                 });
             }
             break
+            case 'remindersolat':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!');
+              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa mengatur fitur ini!');
+
+              const db = loadDB();
+              const groupId = m.chat;
+
+              if (args[0] === 'on') {
+                if (!db.reminderGroups.includes(groupId)) {
+                  db.reminderGroups.push(groupId);
+                  saveDB(db);
+                  replygcxeon('✅ Reminder Sholat berhasil *diaktifkan* untuk grup ini.');
+                } else {
+                  replygcxeon('Reminder Sholat sudah aktif di grup ini.');
+                }
+              } else if (args[0] === 'off') {
+                if (db.reminderGroups.includes(groupId)) {
+                  db.reminderGroups = db.reminderGroups.filter(id => id !== groupId);
+                  saveDB(db);
+                  replygcxeon('❌ Reminder Sholat berhasil *dinonaktifkan* untuk grup ini.');
+                } else {
+              replygcxeon('Reminder Sholat belum aktif di grup ini.');
+              } 
+              } else {
+              replygcxeon('Penggunaan: *.remindersolat on* atau *.remindersolat off*');
+            }
+            break;                            
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
