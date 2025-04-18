@@ -287,6 +287,7 @@ mentionedJid:[sender]}},
 *🔒 modegrup* - Mengubah pengaturan grup (open/close)
 *🔗 linkgrup* - Mendapatkan link undangan grup
 *📥 hidetag* - Mengirim pesan dengan menyembunyikan siapa saja yang ditandai
+*⏱️ remindersolat* - Pengingat waktu sholat di grup
 
 *📚 Konversi Media:*
 *📷 toimage* - Mengonversi stiker menjadi gambar
