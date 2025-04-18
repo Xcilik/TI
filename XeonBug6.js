@@ -21,6 +21,7 @@ const { smsg, getGroupAdmins, formatp, jam, formatDate, getTime, isUrl, await, s
 let afk = require("./lib/afk");
 const { addPremiumUser, getPremiumExpired, getPremiumPosition, expiredCheck, checkPremiumUser, getAllPremiumUser } = require('./lib/premiun')
 const { fetchBuffer, buffergif } = require("./lib/myfunc2")
+const { loadDB, saveDB } = require('./lib/db-remind')
 
 const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
