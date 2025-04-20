@@ -348,6 +348,12 @@ if (m.isGroup && m.text?.startsWith('#')) {
 
 *_Powered by Ti Unusia Bot._*      
                 `;
+                await XeonBotInc.sendMessage(m.chat, {
+                    react: {
+                        text: "🔥", // Emoji reaction
+                        key: m.key  // Reaksi ke pesan user yang memicu perintah
+                    }
+                });            
                 XeonBotInc.sendMessage(m.chat, {
                     text: menu
                 }, {
