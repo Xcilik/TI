@@ -28,7 +28,7 @@ const { loadNotesDB, saveNotesDB } = require('./lib/db-notes')
 const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
 const cv = require('opencv4nodejs-prebuilt-install');
-const daftarAcara = {}; // Format: { chatId: { messageId, title, peserta: [{ id, name }] } }
+global.daftarAcara = global.daftarAcara || {}; // Format: { chatId: { messageId, title, peserta: [{ id, name }] } }
 global.userSessions = global.userSessions || {};
 
 
