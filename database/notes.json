@@ -1,3 +1,7 @@
 {
-  "groupNotes": {}
+  "groupNotes": {
+    "<groupId>": {
+      "<key>": "<noteText>"
+    }
+  }
 }
