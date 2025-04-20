@@ -555,7 +555,7 @@ case 'delnote':
     replygcxeon(`❌ Notes *${keyDel}* tidak ditemukan.`);
   }
   break;            
- case 'buatlist': {
+case 'buatlist': {
     if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
     const acara = args.join(' ');
     if (!acara) return m.reply('Contoh: .buatlist jalan-jalan ke puncak');
@@ -566,12 +566,24 @@ case 'delnote':
     });
 
     daftarAcara[m.chat] = {
-        key: sentMsg.key, // penting: simpan key lengkap
+        key: sentMsg.key,
         title: acara,
         peserta: []
     };
 
-    m.reply('Daftar acara berhasil dibuat. Pin secara manual jika perlu.');
+    // Coba auto-pin pesan
+    try {
+        await XeonBotInc.sendMessage(m.chat, {
+            protocolMessage: {
+                key: sentMsg.key,
+                type: 6 // 6 = pin message
+            }
+        });
+    } catch (err) {
+        console.log('Gagal auto-pin:', err);
+    }
+
+    m.reply('Daftar acara berhasil dibuat dan sudah dipin.');
 }
 break;
 case 'donelist': {
