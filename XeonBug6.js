@@ -371,7 +371,7 @@ case 'save': {
   notesDB.groupNotes ??= {};
   notesDB.groupNotes[gid] ??= {};
 
-  if (quoted.text) {
+  if (quoted.text && !quoted.mtype) {
     notesDB.groupNotes[gid][key] = {
       type: 'text',
       content: quoted.text
@@ -381,14 +381,14 @@ case 'save': {
     const allowed = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
     if (!allowed.includes(mime)) return replygcxeon('❌ Jenis media tidak didukung.');
 
-    const content = await quoted.download();
+    const mediaBuffer = await quoted.download();
 
     notesDB.groupNotes[gid][key] = {
       type: mime,
-      content: Buffer.from(content), // simpan sebagai buffer
+      content: Buffer.from(mediaBuffer),
       mimetype: quoted.mimetype || null,
       fileName: quoted.fileName || '',
-      caption: quoted.text || ''
+      caption: quoted.text || quoted.caption || ''
     };
   } else {
     return replygcxeon('Pesan tidak valid untuk disimpan.');
@@ -398,7 +398,6 @@ case 'save': {
   replygcxeon(`✅ Notes *${key}* berhasil disimpan.`);
 }
 break;
-
 case 'get': {
   if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
   if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*');
