@@ -269,7 +269,15 @@ mentionedJid:[sender]}},
         }
 // Auto-reply jika ditag di grup dengan teks
         
-        
+        if (m.isGroup && m.text && m.text.startsWith('#')) {
+          const notesDB = loadNotesDB();
+          const gid = m.chat;
+          const key = m.text.slice(1).toLowerCase().trim(); // ambil setelah #
+
+          if (notesDB.groupNotes?.[gid]?.[key]) {
+            return replygcxeon(notesDB.groupNotes[gid][key]);
+          }
+        }        
 
         switch (command) {
             case 'help':    
