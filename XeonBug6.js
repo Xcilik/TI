@@ -278,16 +278,33 @@ if (m.isGroup && m.text?.startsWith('#')) {
 
   if (note.type === 'text') {
     return replygcxeon(note.content);
-  } else {
-    return XeonBotInc.sendMessage(m.chat, {
-      [note.type]: note.content,
-      caption: note.caption || '',
-      mimetype: note.mimetype || null,
-      fileName: note.fileName || null
-    }, { quoted: m });
   }
-}  
 
+  const buffer = Buffer.from(note.content?.data || note.content);
+
+  const message = {
+    caption: note.caption || '',
+    quoted: m
+  };
+
+  if (note.type.includes('image')) {
+    message.image = buffer;
+  } else if (note.type.includes('video')) {
+    message.video = buffer;
+  } else if (note.type.includes('audio')) {
+    message.audio = buffer;
+  } else if (note.type.includes('sticker')) {
+    message.sticker = buffer;
+  } else if (note.type.includes('document')) {
+    message.document = buffer;
+    message.mimetype = note.mimetype || 'application/octet-stream';
+    message.fileName = note.fileName || 'file';
+  } else {
+    return; // jika tipe tidak dikenal, tidak kirim apa-apa
+  }
+
+  return XeonBotInc.sendMessage(m.chat, message);
+}
         switch (command) {
             case 'help':    
             case 'menu': {
@@ -339,21 +356,20 @@ _Powered by Ti Unusia Bot._
                 });
             }
             break
-  case 'save':
+
+case 'save': {
   if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
   if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!');
   if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan yg ingin disimpan)');
+  if (!m.quoted) return replygcxeon('Balas pesan yang ingin disimpan.');
 
   const key = args[0].toLowerCase();
-  const notesDB = loadNotesDB();
+  const quoted = m.quoted;
   const gid = m.chat;
+  const notesDB = loadNotesDB();
 
   notesDB.groupNotes ??= {};
   notesDB.groupNotes[gid] ??= {};
-
-  if (!m.quoted) return replygcxeon('Balas pesan yang ingin disimpan.');
-
-  const quoted = m.quoted;
 
   if (quoted.text) {
     notesDB.groupNotes[gid][key] = {
@@ -363,14 +379,14 @@ _Powered by Ti Unusia Bot._
   } else if (quoted.mtype) {
     const mime = quoted.mtype;
     const allowed = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
-    if (!allowed.includes(mime)) return replygcxeon('Jenis media tidak didukung.');
+    if (!allowed.includes(mime)) return replygcxeon('❌ Jenis media tidak didukung.');
 
     const content = await quoted.download();
 
     notesDB.groupNotes[gid][key] = {
       type: mime,
-      content: content,
-      mimetype: quoted.mime,
+      content: Buffer.from(content), // simpan sebagai buffer
+      mimetype: quoted.mimetype || null,
       fileName: quoted.fileName || '',
       caption: quoted.text || ''
     };
@@ -380,9 +396,10 @@ _Powered by Ti Unusia Bot._
 
   saveNotesDB(notesDB);
   replygcxeon(`✅ Notes *${key}* berhasil disimpan.`);
-  break;
+}
+break;
 
-case 'get':
+case 'get': {
   if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
   if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*');
 
@@ -394,14 +411,33 @@ case 'get':
 
   if (noteGet.type === 'text') {
     return replygcxeon(noteGet.content);
-  } else {
-    return XeonBotInc.sendMessage(m.chat, {
-      [noteGet.type]: noteGet.content,
-      caption: noteGet.caption || '',
-      mimetype: noteGet.mimetype || null,
-      fileName: noteGet.fileName || null
-    }, { quoted: m });
   }
+
+  const contentBuffer = Buffer.from(noteGet.content?.data || noteGet.content);
+
+  const message = {
+    caption: noteGet.caption || '',
+    quoted: m
+  };
+
+  if (noteGet.type.includes('image')) {
+    message.image = contentBuffer;
+  } else if (noteGet.type.includes('video')) {
+    message.video = contentBuffer;
+  } else if (noteGet.type.includes('audio')) {
+    message.audio = contentBuffer;
+  } else if (noteGet.type.includes('sticker')) {
+    message.sticker = contentBuffer;
+  } else if (noteGet.type.includes('document')) {
+    message.document = contentBuffer;
+    message.mimetype = noteGet.mimetype || 'application/octet-stream';
+    message.fileName = noteGet.fileName || 'file';
+  } else {
+    return replygcxeon('⚠️ Format note tidak dikenali atau tidak didukung.');
+  }
+
+  return XeonBotInc.sendMessage(m.chat, message);
+}
   break;
 case 'notes': {
   if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
