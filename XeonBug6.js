@@ -272,7 +272,7 @@ if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
     const user = m.sender;
     const group = daftarAcara[m.chat];
 
-    // Cek apakah user sudah terdaftar
+    // Cegah duplikat pendaftar
     if (group.peserta.find(p => p.id === user)) {
         return m.reply('Kamu sudah terdaftar di acara ini!');
     }
@@ -280,7 +280,7 @@ if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
     const name = await XeonBotInc.getName(user);
     group.peserta.push({ id: user, name });
 
-    // Buat ulang isi list
+    // Tulis ulang daftar peserta
     let text = `*📌 Daftar Acara: ${group.title}*\n\nKetik *ikut* untuk mendaftar!\n\n*Peserta:*`;
     group.peserta.forEach((p, i) => {
         text += `\n${i + 1}. @${p.id.split('@')[0]}`;
@@ -289,7 +289,7 @@ if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
     await XeonBotInc.sendMessage(m.chat, {
         text,
         mentions: group.peserta.map(p => p.id),
-        edit: group.messageId
+        edit: group.key // gunakan key lengkap
     });
 }
 
