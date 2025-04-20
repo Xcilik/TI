@@ -571,14 +571,12 @@ case 'buatlist': {
         peserta: []
     };
 
-    // Coba auto-pin pesan
+    // Auto pin menggunakan chatModify (FIXED)
     try {
-        await XeonBotInc.sendMessage(m.chat, {
-            protocolMessage: {
-                key: sentMsg.key,
-                type: 6 // 6 = pin message
-            }
-        });
+        await XeonBotInc.chatModify({
+            pin: true,
+            messageId: sentMsg.key.id
+        }, m.chat);
     } catch (err) {
         console.log('Gagal auto-pin:', err);
     }
