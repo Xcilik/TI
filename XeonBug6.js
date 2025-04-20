@@ -269,15 +269,24 @@ mentionedJid:[sender]}},
         }
 // Auto-reply jika ditag di grup dengan teks
         
-        if (m.isGroup && m.text && m.text.startsWith('#')) {
-          const notesDB = loadNotesDB();
-          const gid = m.chat;
-          const key = m.text.slice(1).toLowerCase().trim(); // ambil setelah #
+if (m.isGroup && m.text?.startsWith('#')) {
+  const notesDB = loadNotesDB();
+  const gid = m.chat;
+  const key = m.text.slice(1).toLowerCase().trim();
+  const note = notesDB.groupNotes?.[gid]?.[key];
+  if (!note) return;
 
-          if (notesDB.groupNotes?.[gid]?.[key]) {
-            return replygcxeon(notesDB.groupNotes[gid][key]);
-          }
-        }        
+  if (note.type === 'text') {
+    return replygcxeon(note.content);
+  } else {
+    return XeonBotInc.sendMessage(m.chat, {
+      [note.type]: note.content,
+      caption: note.caption || '',
+      mimetype: note.mimetype || null,
+      fileName: note.fileName || null
+    }, { quoted: m });
+  }
+}  
 
         switch (command) {
             case 'help':    
@@ -330,107 +339,116 @@ _Powered by Ti Unusia Bot._
                 });
             }
             break
-            case 'save':
-              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
-              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!')
-              if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan teks yang ingin disimpan)')
-              if (!m.quoted || !m.quoted.text) return replygcxeon('Balas pesan teks yang ingin disimpan sebagai catatan.')
+  case 'save':
+  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+  if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!');
+  if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan yg ingin disimpan)');
 
-              {
-                const notesDB = loadNotesDB()
-                const gid = m.chat
-                const key = args[0].toLowerCase()
+  const key = args[0].toLowerCase();
+  const notesDB = loadNotesDB();
+  const gid = m.chat;
 
-                notesDB.groupNotes ??= {}
-                notesDB.groupNotes[gid] ??= {}
-                notesDB.groupNotes[gid][key] = m.quoted.text
-                saveNotesDB(notesDB)
+  notesDB.groupNotes ??= {};
+  notesDB.groupNotes[gid] ??= {};
 
-                replygcxeon(`✅ Notes *${key}* berhasil disimpan untuk grup ini.`)
-              }
-              break
+  if (!m.quoted) return replygcxeon('Balas pesan yang ingin disimpan.');
 
-            case 'get':
-              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
-              if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*')
+  const quoted = m.quoted;
 
-              {
-                const notesDB = loadNotesDB()
-                const gid = m.chat
-                const key = args[0].toLowerCase()
+  if (quoted.text) {
+    notesDB.groupNotes[gid][key] = {
+      type: 'text',
+      content: quoted.text
+    };
+  } else if (quoted.mtype) {
+    const mime = quoted.mtype;
+    const allowed = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
+    if (!allowed.includes(mime)) return replygcxeon('Jenis media tidak didukung.');
 
-                if (!notesDB.groupNotes?.[gid]?.[key]) {
-                  return replygcxeon(`❌ Notes *${key}* tidak ditemukan di grup ini.`)
-                }
-                replygcxeon(notesDB.groupNotes[gid][key])
-              }
-              break
-             case 'notes':
-              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
+    const content = await quoted.download();
 
-              {
-                const notesDB = loadNotesDB()
-                const gid = m.chat
-                const notes = notesDB.groupNotes?.[gid]
+    notesDB.groupNotes[gid][key] = {
+      type: mime,
+      content: content,
+      mimetype: quoted.mime,
+      fileName: quoted.fileName || '',
+      caption: quoted.text || ''
+    };
+  } else {
+    return replygcxeon('Pesan tidak valid untuk disimpan.');
+  }
 
-                if (!notes || Object.keys(notes).length === 0) {
-                  return replygcxeon('Belum ada notes yang disimpan di grup ini.')
-                }
-                const list = Object.keys(notes)
-                  .map((k, i) => `${i + 1}. ${k}`)
-                  .join('\n')
-                replygcxeon(`📚 Daftar Notes di grup ini:\n\n${list}`)
-              }
-              break
+  saveNotesDB(notesDB);
+  replygcxeon(`✅ Notes *${key}* berhasil disimpan.`);
+  break;
 
-            case 'delnote':
-              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
-              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menghapus notes!')
-              if (!args[0]) return replygcxeon('Penggunaan: *.delnote namakey*')
+case 'get':
+  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+  if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*');
 
-              {
-                const notesDB = loadNotesDB()
-                const gid = m.chat
-                const key = args[0].toLowerCase()
+  const keyGet = args[0].toLowerCase();
+  const dbGet = loadNotesDB();
+  const noteGet = dbGet.groupNotes?.[m.chat]?.[keyGet];
 
-                if (!notesDB.groupNotes?.[gid]?.[key]) {
-                  return replygcxeon(`❌ Notes *${key}* tidak ditemukan di grup ini.`)
-                }
-                delete notesDB.groupNotes[gid][key]
-                saveNotesDB(notesDB)
+  if (!noteGet) return replygcxeon(`❌ Notes *${keyGet}* tidak ditemukan.`);
 
-                replygcxeon(`🗑️ Notes *${key}* berhasil dihapus dari grup ini.`)
-              }
-              break
+  if (noteGet.type === 'text') {
+    return replygcxeon(noteGet.content);
+  } else {
+    return XeonBotInc.sendMessage(m.chat, {
+      [noteGet.type]: noteGet.content,
+      caption: noteGet.caption || '',
+      mimetype: noteGet.mimetype || null,
+      fileName: noteGet.fileName || null
+    }, { quoted: m });
+  }
+  break;
+case 'notes': {
+  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
 
-                
-            case 'remindersolat':
-              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!');
-              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa mengatur fitur ini!');
+  const db = loadNotesDB();
+  const groupNotes = db.groupNotes?.[m.chat];
 
-              const db = loadDB();
-              const groupId = m.chat;
+  if (!groupNotes || Object.keys(groupNotes).length === 0) {
+    return replygcxeon('Belum ada notes yang disimpan di grup ini.');
+  }
 
-              if (args[0] === 'on') {
-                if (!db.reminderGroups.includes(groupId)) {
-                  db.reminderGroups.push(groupId);
-                  saveDB(db);
-                  replygcxeon('✅ Reminder Sholat berhasil *diaktifkan* untuk grup ini.');
-                } else {
-                  replygcxeon('Reminder Sholat sudah aktif di grup ini.');
-                }
-              } else if (args[0] === 'off') {
-                if (db.reminderGroups.includes(groupId)) {
-                  db.reminderGroups = db.reminderGroups.filter(id => id !== groupId);
-                  saveDB(db);
-                  replygcxeon('❌ Reminder Sholat berhasil *dinonaktifkan* untuk grup ini.');
-                } else {
-              replygcxeon('Reminder Sholat belum aktif di grup ini.');
-              } 
-              } else {
-              replygcxeon('Penggunaan: *.remindersolat on* atau *.remindersolat off*');
-            }
-            break;                            
+  let teks = `📌 *Daftar Notes di Grup Ini:*\n\n`;
+  let i = 1;
+  for (const [key, val] of Object.entries(groupNotes)) {
+    const typeLabel = (() => {
+      if (val.type === 'text') return 'text';
+      if (val.type.includes('image')) return 'image';
+      if (val.type.includes('video')) return 'video';
+      if (val.type.includes('audio')) return 'audio';
+      if (val.type.includes('sticker')) return 'sticker';
+      if (val.type.includes('document')) return 'document';
+      return 'media';
+    })();
+
+    teks += `${i++}. ${key} (${typeLabel})\n`;
+  }
+
+  replygcxeon(teks);
+}
+break;
+
+case 'delnote':
+  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+  if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menghapus notes!');
+  if (!args[0]) return replygcxeon('Penggunaan: *.delnote namakey*');
+
+  const keyDel = args[0].toLowerCase();
+  const dbDel = loadNotesDB();
+
+  if (dbDel.groupNotes?.[m.chat]?.[keyDel]) {
+    delete dbDel.groupNotes[m.chat][keyDel];
+    saveNotesDB(dbDel);
+    replygcxeon(`✅ Notes *${keyDel}* berhasil dihapus.`);
+  } else {
+    replygcxeon(`❌ Notes *${keyDel}* tidak ditemukan.`);
+  }
+  break;                          
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
