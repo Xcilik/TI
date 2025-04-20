@@ -299,7 +299,14 @@ mentionedJid:[sender]}},
 *📥 hidetag* - Mengirim pesan dengan menyembunyikan siapa saja yang ditandai
 *⏱️ remindersolat* - Pengingat waktu sholat di grup
 
-*📚 Konversi Media:*
+*📚 Catatan Grup*
+*🗂️ notes* - Melihat nama catatan
+*📬 save* (name) - Balas ke pesan yang ingin disimpan
+*📭 get* (name) atau #name - Mengambil isi catatan
+*🗑️ delnote* - Menghapus catatan
+
+
+*📂 Konversi Media:*
 *📷 toimage* - Mengonversi stiker menjadi gambar
 *📹 tovideo* - Mengonversi stiker menjadi video
 *🎵 toaudio* - Mengonversi video atau audio menjadi audio
