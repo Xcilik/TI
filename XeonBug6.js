@@ -22,6 +22,8 @@ let afk = require("./lib/afk");
 const { addPremiumUser, getPremiumExpired, getPremiumPosition, expiredCheck, checkPremiumUser, getAllPremiumUser } = require('./lib/premiun')
 const { fetchBuffer, buffergif } = require("./lib/myfunc2")
 const { loadDB, saveDB } = require('./lib/db-remind')
+// di file utama bot kamu
+const { loadNotesDB, saveNotesDB } = require('./lib/db-notes')
 
 const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
@@ -313,6 +315,80 @@ _Powered by Ti Unusia Bot._
                 });
             }
             break
+            case 'save':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
+              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!')
+              if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan teks yang ingin disimpan)')
+              if (!m.quoted || !m.quoted.text) return replygcxeon('Balas pesan teks yang ingin disimpan sebagai catatan.')
+
+              {
+                const notesDB = loadNotesDB()
+                const gid = m.chat
+                const key = args[0].toLowerCase()
+
+                notesDB.groupNotes ??= {}
+                notesDB.groupNotes[gid] ??= {}
+                notesDB.groupNotes[gid][key] = m.quoted.text
+                saveNotesDB(notesDB)
+
+                replygcxeon(`✅ Notes *${key}* berhasil disimpan untuk grup ini.`)
+              }
+              break
+
+            case 'get':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
+              if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*')
+
+              {
+                const notesDB = loadNotesDB()
+                const gid = m.chat
+                const key = args[0].toLowerCase()
+
+                if (!notesDB.groupNotes?.[gid]?.[key]) {
+                  return replygcxeon(`❌ Notes *${key}* tidak ditemukan di grup ini.`)
+                }
+                replygcxeon(notesDB.groupNotes[gid][key])
+              }
+              break
+             case 'notes':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
+
+              {
+                const notesDB = loadNotesDB()
+                const gid = m.chat
+                const notes = notesDB.groupNotes?.[gid]
+
+                if (!notes || Object.keys(notes).length === 0) {
+                  return replygcxeon('Belum ada notes yang disimpan di grup ini.')
+                }
+                const list = Object.keys(notes)
+                  .map((k, i) => `${i + 1}. ${k}`)
+                  .join('\n')
+                replygcxeon(`📚 Daftar Notes di grup ini:\n\n${list}`)
+              }
+              break
+
+            case 'delnote':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!')
+              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menghapus notes!')
+              if (!args[0]) return replygcxeon('Penggunaan: *.delnote namakey*')
+
+              {
+                const notesDB = loadNotesDB()
+                const gid = m.chat
+                const key = args[0].toLowerCase()
+
+                if (!notesDB.groupNotes?.[gid]?.[key]) {
+                  return replygcxeon(`❌ Notes *${key}* tidak ditemukan di grup ini.`)
+                }
+                delete notesDB.groupNotes[gid][key]
+                saveNotesDB(notesDB)
+
+                replygcxeon(`🗑️ Notes *${key}* berhasil dihapus dari grup ini.`)
+              }
+              break
+
+                
             case 'remindersolat':
               if (!m.isGroup) return replygcxeon('Fitur ini hanya bisa digunakan di grup!');
               if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa mengatur fitur ini!');
