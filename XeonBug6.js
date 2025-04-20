@@ -345,9 +345,8 @@ if (m.isGroup && m.text?.startsWith('#')) {
 *📝 Pembuat Konten:*
 *📄 buatpdf* - Mengumpulkan gambar untuk membuat PDF
 *🎨 stickerwm* - Menambahkan watermark pada stiker
-*🖼️ tikel* - Mengonversi gambar/video menjadi stiker
 
-_Powered by Ti Unusia Bot._       
+*_Powered by Ti Unusia Bot._*      
                 `;
                 XeonBotInc.sendMessage(m.chat, {
                     text: menu
