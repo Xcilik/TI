@@ -28,7 +28,7 @@ const { loadNotesDB, saveNotesDB } = require('./lib/db-notes')
 const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
 const cv = require('opencv4nodejs-prebuilt-install');
-
+const daftarAcara = {}; // Format: { chatId: { messageId, title, peserta: [{ id, name }] } }
 global.userSessions = global.userSessions || {};
 
 
@@ -267,6 +267,33 @@ mentionedJid:[sender]}},
             delete userSessions[m.sender];
         
         }
+
+if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
+    const user = m.sender;
+    const group = daftarAcara[m.chat];
+
+    // Cek apakah user sudah terdaftar
+    if (group.peserta.find(p => p.id === user)) {
+        return m.reply('Kamu sudah terdaftar di acara ini!');
+    }
+
+    const name = await XeonBotInc.getName(user);
+    group.peserta.push({ id: user, name });
+
+    // Buat ulang isi list
+    let text = `*📌 Daftar Acara: ${group.title}*\n\nKetik *ikut* untuk mendaftar!\n\n*Peserta:*`;
+    group.peserta.forEach((p, i) => {
+        text += `\n${i + 1}. @${p.id.split('@')[0]}`;
+    });
+
+    await XeonBotInc.sendMessage(m.chat, {
+        text,
+        mentions: group.peserta.map(p => p.id),
+        edit: group.messageId
+    });
+}
+
+        
 // Auto-reply jika ditag di grup dengan teks
         
 if (m.isGroup && m.text?.startsWith('#')) {
@@ -488,7 +515,30 @@ case 'delnote':
   } else {
     replygcxeon(`❌ Notes *${keyDel}* tidak ditemukan.`);
   }
-  break;                          
+  break;            
+ case 'buatlist': {
+    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+
+    const acara = args.join(' ');
+    if (!acara) return m.reply('Contoh penggunaan: .buatlist jalan-jalan ke puncak');
+
+    const initialText = `*📌 Daftar Acara: ${acara}*\n\nKetik *ikut* untuk mendaftar!\n\n*Peserta:*`;
+    const sentMsg = await XeonBotInc.sendMessage(m.chat, {
+        text: initialText
+    });
+
+    // Simpan ke daftar
+    daftarAcara[m.chat] = {
+        messageId: sentMsg.key.id,
+        title: acara,
+        peserta: []
+    };
+
+    // Auto pin message (butuh permission admin & fitur pin)
+    await XeonBotInc.groupPinMessage(m.chat, sentMsg.key.id);
+    m.reply('Daftar acara berhasil dibuat dan dipin!');
+}
+break;               
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
