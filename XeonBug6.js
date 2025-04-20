@@ -271,9 +271,11 @@ mentionedJid:[sender]}},
         
         }
 
-if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
-    const user = m.sender;
+if (budy.toLowerCase() === 'ikut') {
+    if (!daftarAcara[m.chat]) return; // Tidak ada acara aktif
+
     const group = daftarAcara[m.chat];
+    const user = m.sender;
 
     if (group.peserta.find(p => p.id === user)) {
         return m.reply('Kamu sudah terdaftar di acara ini!');
@@ -282,7 +284,7 @@ if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
     const name = await XeonBotInc.getName(user);
     group.peserta.push({ id: user, name });
 
-    let text = `*📌 Daftar Acara: ${group.title}*\n\nKetik *ikut* untuk mendaftar!\n\n*Peserta:*`;
+    let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* untuk jika mau ikut!\n\n*Peserta:*`;
     group.peserta.forEach((p, i) => {
         text += `\n${i + 1}. @${p.id.split('@')[0]}`;
     });
@@ -291,10 +293,42 @@ if (budy.toLowerCase() === 'ikut' && daftarAcara[m.chat]) {
         await XeonBotInc.sendMessage(m.chat, {
             text,
             mentions: group.peserta.map(p => p.id),
-            edit: group.key // harus objek key lengkap
+            edit: group.key
         });
     } catch (e) {
         console.log('Gagal edit:', e);
+        m.reply('Gagal update daftar, coba lagi nanti.');
+    }
+}
+
+
+if (budy.toLowerCase() === 'gakjadiikut') {
+    if (!daftarAcara[m.chat]) return;
+
+    const group = daftarAcara[m.chat];
+    const user = m.sender;
+
+    const index = group.peserta.findIndex(p => p.id === user);
+    if (index === -1) {
+        return m.reply('Kamu belum terdaftar di acara ini!');
+    }
+
+    group.peserta.splice(index, 1); // Hapus dari daftar
+
+    let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
+    group.peserta.forEach((p, i) => {
+        text += `\n${i + 1}. @${p.id.split('@')[0]}`;
+    });
+
+    try {
+        await XeonBotInc.sendMessage(m.chat, {
+            text,
+            mentions: group.peserta.map(p => p.id),
+            edit: group.key
+        });
+        m.reply('Oke, kamu sudah dibatalkan dari daftar.');
+    } catch (e) {
+        console.log('Gagal update daftar:', e);
         m.reply('Gagal update daftar, coba lagi nanti.');
     }
 }
@@ -526,7 +560,7 @@ case 'delnote':
     const acara = args.join(' ');
     if (!acara) return m.reply('Contoh: .buatlist jalan-jalan ke puncak');
 
-    const initialText = `*📌 Daftar Acara: ${acara}*\n\nKetik *ikut* untuk mendaftar!\n\n*Peserta:*`;
+    const initialText = `*📌 Nama Acara: ${acara}*\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
     const sentMsg = await XeonBotInc.sendMessage(m.chat, {
         text: initialText
     });
@@ -540,6 +574,14 @@ case 'delnote':
     m.reply('Daftar acara berhasil dibuat. Pin secara manual jika perlu.');
 }
 break;
+case 'donelist': {
+    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+    if (!daftarAcara[m.chat]) return m.reply('Tidak ada acara yang aktif.');
+
+    delete daftarAcara[m.chat];
+    m.reply('Acara selesai. Terima kasih untuk yang sudah ikut!');
+}
+break;                
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
