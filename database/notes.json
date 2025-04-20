@@ -1,7 +1,17 @@
 {
   "groupNotes": {
-    "<groupId>": {
-      "<key>": "<noteText>"
+    "120xxxxx@g.us": {
+      "rules": {
+        "type": "text",
+        "content": "Ini peraturan grup"
+      },
+      "logo": {
+        "type": "imageMessage",
+        "content": "<buffer base64>",
+        "caption": "Logo grup",
+        "mimetype": "image/jpeg",
+        "fileName": "logo.jpg"
+      }
     }
   }
 }
