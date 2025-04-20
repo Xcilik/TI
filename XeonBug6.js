@@ -535,7 +535,7 @@ case 'delnote':
     };
 
     // Auto pin message (butuh permission admin & fitur pin)
-    await XeonBotInc.groupPinMessage(m.chat, sentMsg.key.id);
+  //  await XeonBotInc.groupPinMessage(m.chat, sentMsg.key.id);
     m.reply('Daftar acara berhasil dibuat dan dipin!');
 }
 break;               
