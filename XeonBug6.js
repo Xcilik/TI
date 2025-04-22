@@ -270,104 +270,108 @@ mentionedJid:[sender]}},
             delete userSessions[m.sender];
         
         }
-
-if (budy.toLowerCase() === 'ikut') {
-    if (!daftarAcara[m.chat]) return; // Tidak ada acara aktif
-
-    const group = daftarAcara[m.chat];
-    const user = m.sender;
-
-    if (group.peserta.find(p => p.id === user)) {
-        return m.reply('Kamu sudah terdaftar di acara ini!');
-    }
-
-    const name = await XeonBotInc.getName(user);
-    group.peserta.push({ id: user, name });
-
-    let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* untuk jika mau ikut!\n\n*Peserta:*`;
-    group.peserta.forEach((p, i) => {
-        text += `\n${i + 1}. @${p.id.split('@')[0]}`;
-    });
-
-    try {
-        await XeonBotInc.sendMessage(m.chat, {
-            text,
-            mentions: group.peserta.map(p => p.id),
-            edit: group.key
-        });
-    } catch (e) {
-        console.log('Gagal edit:', e);
-        m.reply('Gagal update daftar, coba lagi nanti.');
-    }
-}
-
-
-if (budy.toLowerCase() === 'gakjadiikut') {
-    if (!daftarAcara[m.chat]) return;
-
-    const group = daftarAcara[m.chat];
-    const user = m.sender;
-
-    const index = group.peserta.findIndex(p => p.id === user);
-    if (index === -1) {
-        return m.reply('Kamu belum terdaftar di acara ini!');
-    }
-
-    group.peserta.splice(index, 1); // Hapus dari daftar
-
-    let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
-    group.peserta.forEach((p, i) => {
-        text += `\n${i + 1}. @${p.id.split('@')[0]}`;
-    });
-
-    try {
-        await XeonBotInc.sendMessage(m.chat, {
-            text,
-            mentions: group.peserta.map(p => p.id),
-            edit: group.key
-        });
-        m.reply('Oke, kamu sudah dibatalkan dari daftar.');
-    } catch (e) {
-        console.log('Gagal update daftar:', e);
-        m.reply('Gagal update daftar, coba lagi nanti.');
-    }
-}
         
-// Auto-reply jika ditag di grup dengan teks
+        if (budy.toLowerCase().trim() === 'ikut') {
+            if (!daftarAcara[m.chat]) return; // Tidak ada acara aktif
         
-if (m.isGroup && m.text?.startsWith('#')) {
-  const notesDB = loadNotesDB();
-  const gid = m.chat;
-  const key = m.text.slice(1).toLowerCase().trim();
-  const note = notesDB.groupNotes?.[gid]?.[key];
-  if (!note) return;
+            const group = daftarAcara[m.chat];
+            const user = m.sender;
+        
+            if (group.peserta.find(p => p.id === user)) {
+                return m.reply('Kamu sudah terdaftar di acara ini!');
+            }
+        
+            const name = await XeonBotInc.getName(user);
+            group.peserta.push({ id: user, name });
+        
+            // Reply "ya kamu ikut" ke yang ngetik
+            await m.reply('Ya kamu ikut');
+        
+            // Update daftar peserta
+            let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* untuk jika mau ikut!\n\n*Peserta:*`;
+            group.peserta.forEach((p, i) => {
+                text += `\n${i + 1}. @${p.id.split('@')[0]}`;
+            });
+        
+            try {
+                await XeonBotInc.sendMessage(m.chat, {
+                    text,
+                    mentions: group.peserta.map(p => p.id),
+                    edit: group.key
+                });
+            } catch (e) {
+                console.log('Gagal edit:', e);
+                m.reply('Gagal update daftar, coba lagi nanti.');
+            }
+        }
 
-  if (note.type === 'text') {
-    return replygcxeon(note.content);
-  }
-
-  const buffer = Buffer.from(note.content?.data || note.content);
-
-  const message = {
-    caption: note.caption || '',
-    quoted: m
-  };
-
-  if (note.type.includes('image')) {
-    message.image = buffer;
-  } else if (note.type.includes('video')) {
-    message.video = buffer;
-  } else if (note.type.includes('audio')) {
-    message.audio = buffer;
-  } else if (note.type.includes('sticker')) {
-    message.sticker = buffer;
-  } else if (note.type.includes('document')) {
-    message.document = buffer;
-    message.mimetype = note.mimetype || 'application/octet-stream';
-    message.fileName = note.fileName || 'file';
-  } else {
-    return; // jika tipe tidak dikenal, tidak kirim apa-apa
-  }
+        
+        if (budy.toLowerCase().trim() === 'gakjadi') {
+            if (!daftarAcara[m.chat]) return;
+        
+            const group = daftarAcara[m.chat];
+            const user = m.sender;
+        
+            const index = group.peserta.findIndex(p => p.id === user);
+            if (index === -1) {
+                return m.reply('Kamu belum terdaftar di acara ini!');
+            }
+        
+            group.peserta.splice(index, 1); // Hapus dari daftar
+        
+            let text = `*📌 Nama Acara: ${group.title}*\n\n*Total Peserta:* ${group.peserta.length}\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
+            group.peserta.forEach((p, i) => {
+                text += `\n${i + 1}. @${p.id.split('@')[0]}`;
+            });
+        
+            try {
+                await XeonBotInc.sendMessage(m.chat, {
+                    text,
+                    mentions: group.peserta.map(p => p.id),
+                    edit: group.key
+                });
+                m.reply('Oke, kamu gak jadi ikut.');
+            } catch (e) {
+                console.log('Gagal update daftar:', e);
+                m.reply('Gagal update daftar, coba lagi nanti.');
+            }
+        }
+                
+        // Auto-reply jika ditag di grup dengan teks
+                
+        if (m.isGroup && m.text?.startsWith('#')) {
+          const notesDB = loadNotesDB();
+          const gid = m.chat;
+          const key = m.text.slice(1).toLowerCase().trim();
+          const note = notesDB.groupNotes?.[gid]?.[key];
+          if (!note) return;
+        
+          if (note.type === 'text') {
+            return replygcxeon(note.content);
+          }
+        
+          const buffer = Buffer.from(note.content?.data || note.content);
+        
+          const message = {
+            caption: note.caption || '',
+            quoted: m
+          };
+        
+          if (note.type.includes('image')) {
+            message.image = buffer;
+          } else if (note.type.includes('video')) {
+            message.video = buffer;
+          } else if (note.type.includes('audio')) {
+            message.audio = buffer;
+          } else if (note.type.includes('sticker')) {
+            message.sticker = buffer;
+          } else if (note.type.includes('document')) {
+            message.document = buffer;
+            message.mimetype = note.mimetype || 'application/octet-stream';
+            message.fileName = note.fileName || 'file';
+          } else {
+            return; // jika tipe tidak dikenal, tidak kirim apa-apa
+          }
 
   return XeonBotInc.sendMessage(m.chat, message);
 }
@@ -427,171 +431,162 @@ if (m.isGroup && m.text?.startsWith('#')) {
                 });
             }
             break
-
-case 'save': {
-  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
-  if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!');
-  if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan yg ingin disimpan)');
-  if (!m.quoted) return replygcxeon('Balas pesan yang ingin disimpan.');
-
-  const key = args[0].toLowerCase();
-  const quoted = m.quoted;
-  const gid = m.chat;
-  const notesDB = loadNotesDB();
-
-  notesDB.groupNotes ??= {};
-  notesDB.groupNotes[gid] ??= {};
-
-  if (quoted.text && !quoted.mtype) {
-    notesDB.groupNotes[gid][key] = {
-      type: 'text',
-      content: quoted.text
-    };
-  } else if (quoted.mtype) {
-    const mime = quoted.mtype;
-    const allowed = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
-    if (!allowed.includes(mime)) return replygcxeon('❌ Jenis media tidak didukung.');
-
-    const mediaBuffer = await quoted.download();
-
-    notesDB.groupNotes[gid][key] = {
-      type: mime,
-      content: Buffer.from(mediaBuffer),
-      mimetype: quoted.mimetype || null,
-      fileName: quoted.fileName || '',
-      caption: quoted.text || quoted.caption || ''
-    };
-  } else {
-    return replygcxeon('Pesan tidak valid untuk disimpan.');
-  }
-
-  saveNotesDB(notesDB);
-  replygcxeon(`✅ Notes *${key}* berhasil disimpan.`);
-}
-break;
-case 'get': {
-  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
-  if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*');
-
-  const keyGet = args[0].toLowerCase();
-  const dbGet = loadNotesDB();
-  const noteGet = dbGet.groupNotes?.[m.chat]?.[keyGet];
-
-  if (!noteGet) return replygcxeon(`❌ Notes *${keyGet}* tidak ditemukan.`);
-
-  if (noteGet.type === 'text') {
-    return replygcxeon(noteGet.content);
-  }
-
-  const contentBuffer = Buffer.from(noteGet.content?.data || noteGet.content);
-
-  const message = {
-    caption: noteGet.caption || '',
-    quoted: m
-  };
-
-  if (noteGet.type.includes('image')) {
-    message.image = contentBuffer;
-  } else if (noteGet.type.includes('video')) {
-    message.video = contentBuffer;
-  } else if (noteGet.type.includes('audio')) {
-    message.audio = contentBuffer;
-  } else if (noteGet.type.includes('sticker')) {
-    message.sticker = contentBuffer;
-  } else if (noteGet.type.includes('document')) {
-    message.document = contentBuffer;
-    message.mimetype = noteGet.mimetype || 'application/octet-stream';
-    message.fileName = noteGet.fileName || 'file';
-  } else {
-    return replygcxeon('⚠️ Format note tidak dikenali atau tidak didukung.');
-  }
-
-  return XeonBotInc.sendMessage(m.chat, message);
-}
-  break;
-case 'notes': {
-  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
-
-  const db = loadNotesDB();
-  const groupNotes = db.groupNotes?.[m.chat];
-
-  if (!groupNotes || Object.keys(groupNotes).length === 0) {
-    return replygcxeon('Belum ada notes yang disimpan di grup ini.');
-  }
-
-  let teks = `📌 *Daftar Notes di Grup Ini:*\n\n`;
-  let i = 1;
-  for (const [key, val] of Object.entries(groupNotes)) {
-    const typeLabel = (() => {
-      if (val.type === 'text') return 'text';
-      if (val.type.includes('image')) return 'image';
-      if (val.type.includes('video')) return 'video';
-      if (val.type.includes('audio')) return 'audio';
-      if (val.type.includes('sticker')) return 'sticker';
-      if (val.type.includes('document')) return 'document';
-      return 'media';
-    })();
-
-    teks += `${i++}. ${key} (${typeLabel})\n`;
-  }
-
-  replygcxeon(teks);
-}
-break;
-
-case 'delnote':
-  if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
-  if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menghapus notes!');
-  if (!args[0]) return replygcxeon('Penggunaan: *.delnote namakey*');
-
-  const keyDel = args[0].toLowerCase();
-  const dbDel = loadNotesDB();
-
-  if (dbDel.groupNotes?.[m.chat]?.[keyDel]) {
-    delete dbDel.groupNotes[m.chat][keyDel];
-    saveNotesDB(dbDel);
-    replygcxeon(`✅ Notes *${keyDel}* berhasil dihapus.`);
-  } else {
-    replygcxeon(`❌ Notes *${keyDel}* tidak ditemukan.`);
-  }
-  break;            
-case 'buatlist': {
-    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    const acara = args.join(' ');
-    if (!acara) return m.reply('Contoh: .buatlist jalan-jalan ke puncak');
-
-    const initialText = `*📌 Nama Acara: ${acara}*\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
-    const sentMsg = await XeonBotInc.sendMessage(m.chat, {
-        text: initialText
-    });
-
-    daftarAcara[m.chat] = {
-        key: sentMsg.key,
-        title: acara,
-        peserta: []
-    };
-
-    // Auto pin menggunakan chatModify (FIXED)
-    try {
-        await XeonBotInc.chatModify({
-            pin: true,
-            messageId: sentMsg.key.id
-        }, m.chat);
-    } catch (err) {
-        console.log('Gagal auto-pin:', err);
-    }
-
-    m.reply('Daftar acara berhasil dibuat dan sudah dipin.');
-}
-break;
-case 'donelist': {
-    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (!daftarAcara[m.chat]) return m.reply('Tidak ada acara yang aktif.');
-
-    delete daftarAcara[m.chat];
-    m.reply('Acara selesai. Terima kasih untuk yang sudah ikut!');
-}
-break;                
+            
+            case 'save': {
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menyimpan notes!');
+              if (!args[0]) return replygcxeon('Penggunaan: *.save namakey* (balas pesan yg ingin disimpan)');
+              if (!m.quoted) return replygcxeon('Balas pesan yang ingin disimpan.');
+            
+              const key = args[0].toLowerCase();
+              const quoted = m.quoted;
+              const gid = m.chat;
+              const notesDB = loadNotesDB();
+            
+              notesDB.groupNotes ??= {};
+              notesDB.groupNotes[gid] ??= {};
+            
+              if (quoted.text && !quoted.mtype) {
+                notesDB.groupNotes[gid][key] = {
+                  type: 'text',
+                  content: quoted.text
+                };
+              } else if (quoted.mtype) {
+                const mime = quoted.mtype;
+                const allowed = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
+                if (!allowed.includes(mime)) return replygcxeon('❌ Jenis media tidak didukung.');
+            
+                const mediaBuffer = await quoted.download();
+            
+                notesDB.groupNotes[gid][key] = {
+                  type: mime,
+                  content: Buffer.from(mediaBuffer),
+                  mimetype: quoted.mimetype || null,
+                  fileName: quoted.fileName || '',
+                  caption: quoted.text || quoted.caption || ''
+                };
+              } else {
+                return replygcxeon('Pesan tidak valid untuk disimpan.');
+              }
+            
+              saveNotesDB(notesDB);
+              replygcxeon(`✅ Notes *${key}* berhasil disimpan.`);
+            }
+            break;
+            case 'get': {
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+              if (!args[0]) return replygcxeon('Penggunaan: *.get namakey*');
+            
+              const keyGet = args[0].toLowerCase();
+              const dbGet = loadNotesDB();
+              const noteGet = dbGet.groupNotes?.[m.chat]?.[keyGet];
+            
+              if (!noteGet) return replygcxeon(`❌ Notes *${keyGet}* tidak ditemukan.`);
+            
+              if (noteGet.type === 'text') {
+                return replygcxeon(noteGet.content);
+              }
+            
+              const contentBuffer = Buffer.from(noteGet.content?.data || noteGet.content);
+            
+              const message = {
+                caption: noteGet.caption || '',
+                quoted: m
+              };
+            
+              if (noteGet.type.includes('image')) {
+                message.image = contentBuffer;
+              } else if (noteGet.type.includes('video')) {
+                message.video = contentBuffer;
+              } else if (noteGet.type.includes('audio')) {
+                message.audio = contentBuffer;
+              } else if (noteGet.type.includes('sticker')) {
+                message.sticker = contentBuffer;
+              } else if (noteGet.type.includes('document')) {
+                message.document = contentBuffer;
+                message.mimetype = noteGet.mimetype || 'application/octet-stream';
+                message.fileName = noteGet.fileName || 'file';
+              } else {
+                return replygcxeon('⚠️ Format note tidak dikenali atau tidak didukung.');
+              }
+            
+              return XeonBotInc.sendMessage(m.chat, message);
+            }
+              break;
+            case 'notes': {
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+            
+              const db = loadNotesDB();
+              const groupNotes = db.groupNotes?.[m.chat];
+            
+              if (!groupNotes || Object.keys(groupNotes).length === 0) {
+                return replygcxeon('Belum ada notes yang disimpan di grup ini.');
+              }
+            
+              let teks = `📌 *Daftar Notes di Grup Ini:*\n\n`;
+              let i = 1;
+              for (const [key, val] of Object.entries(groupNotes)) {
+                const typeLabel = (() => {
+                  if (val.type === 'text') return 'text';
+                  if (val.type.includes('image')) return 'image';
+                  if (val.type.includes('video')) return 'video';
+                  if (val.type.includes('audio')) return 'audio';
+                  if (val.type.includes('sticker')) return 'sticker';
+                  if (val.type.includes('document')) return 'document';
+                  return 'media';
+                })();
+            
+                teks += `${i++}. ${key} (${typeLabel})\n`;
+              }
+            
+              replygcxeon(teks);
+            }
+            break;
+            
+            case 'delnote':
+              if (!m.isGroup) return replygcxeon('Fitur ini hanya untuk grup!');
+              if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon('Hanya admin yang bisa menghapus notes!');
+              if (!args[0]) return replygcxeon('Penggunaan: *.delnote namakey*');
+            
+              const keyDel = args[0].toLowerCase();
+              const dbDel = loadNotesDB();
+            
+              if (dbDel.groupNotes?.[m.chat]?.[keyDel]) {
+                delete dbDel.groupNotes[m.chat][keyDel];
+                saveNotesDB(dbDel);
+                replygcxeon(`✅ Notes *${keyDel}* berhasil dihapus.`);
+              } else {
+                replygcxeon(`❌ Notes *${keyDel}* tidak ditemukan.`);
+              }
+              break;            
+ // Pastikan daftarAcara dibuat global
+            case 'buatlist': {
+                if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+                const acara = args.join(' ');
+                if (!acara) return m.reply('Contoh: .buatlist jalan-jalan ke puncak');
+            
+                const initialText = `*📌 Nama Acara: ${acara}*\n\nKetik *ikut* jika ingin ikut!\n\n*Peserta:*`;
+                const sentMsg = await XeonBotInc.sendMessage(m.chat, { text: initialText });
+            
+                daftarAcara[m.chat] = {
+                    key: sentMsg.key,
+                    title: acara,
+                    peserta: []
+                };
+            
+                m.reply('List berhasil dibuat. Silakan di PIN.');
+            }
+            break;
+            
+            case 'donelist': {
+                if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+                if (!daftarAcara[m.chat]) return m.reply('Tidak ada list yang aktif.');
+            
+                delete daftarAcara[m.chat];
+                m.reply('List selesai. Terima kasih untuk yang sudah ikut!');
+            }
+            break;
+                     
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
