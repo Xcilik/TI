@@ -410,7 +410,6 @@ mentionedJid:[sender]}},
 *📞 tovn* - Mengonversi audio atau video menjadi voice note (VN)
 *🎞️ togif* - Mengonversi stiker menjadi GIF
 *🖼️ tikel* - Mengonversi image/video menjadi stiker
-*🔗 tourl* - Mengonversi media menjadi URL (image/video)
 
 *📝 Pembuat Konten:*
 *📄 buatpdf* - Mengumpulkan gambar untuk membuat PDF
@@ -922,24 +921,7 @@ mentionedJid:[sender]}},
                     replygcxeon('Media yang kamu kirim bukan gambar WebP atau video.')
                 }
             }
-            break
-            case 'tourl': {
-                if (!qmsg) {
-                    return replygcxeon('Penggunaan: *tourl* balas kepesan gambar');
-                }                
-                replygcxeon(mess.wait)
-                let media = await XeonBotInc.downloadAndSaveMediaMessage(qmsg)
-                if (/image/.test(mime)) {
-                    let anu = await TelegraPh(media)
-                    replygcxeon(util.format(anu))
-                } else if (!/image/.test(mime)) {
-                    let anu = await UploadFileUgu(media)
-                    replygcxeon(util.format(anu))
-                }
-                await fs.unlinkSync(media)
-
-            }
-            break                        
+            break                       
             case 'tikel':
             case 's': {
                 if (!quoted) return replygcxeon(`Penggunaan: *tikel* balas kepesan gambar/video`)
