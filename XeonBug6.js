@@ -603,21 +603,21 @@ case 'absen': {
         peserta: []
     };
 
-    m.reply('Absen dimulai. Silakan di PIN.');
+    m.reply('Absensi dimulai. Silakan di PIN.');
 }
 break;
 case 'doneabsen': {
     if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (!daftarAbsen[m.chat]) return m.reply('Tidak ada absen yang aktif.');
+    if (!daftarAbsen[m.chat]) return m.reply('Tidak ada absensi yang aktif.');
 
     delete daftarAbsen[m.chat];
-    m.reply('Absen ditutup. Terima kasih semua!');
+    m.reply('Absensi ditutup. Terima kasih semua!');
 }
 break;
                 
 case 'hadir': {
     if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (!daftarAbsen[m.chat]) return m.reply('Belum ada absen yang dimulai.');
+    if (!daftarAbsen[m.chat]) return m.reply('Belum ada absensi yang dimulai.');
 
     const nama = args.join(' ');
     if (!nama) return m.reply('Ketik: *.hadir Nama Lengkap*');
@@ -625,12 +625,12 @@ case 'hadir': {
     const list = daftarAbsen[m.chat];
 
     if (list.peserta.some(p => p.id === m.sender)) {
-        return m.reply('Kamu sudah absen sebelumnya.');
+        return m.reply('Kamu sudah absensi sebelumnya.');
     }
 
     list.peserta.push({ id: m.sender, nama });
 
-    const updatedText = `*📋 Absen: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
+    const updatedText = `*📋 Absensi: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absensi.\n\n*Daftar Hadir:*\n` +
         list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n');
 
     await XeonBotInc.sendMessage(m.chat, {
@@ -638,7 +638,7 @@ case 'hadir': {
         edit: list.key
     });
 
-    m.reply('Terima kasih, absen kamu sudah dicatat.');
+    m.reply('Terima kasih, absensi kamu sudah dicatat.');
 }
 break;                
             case 'addmember':
