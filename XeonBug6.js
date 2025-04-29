@@ -277,7 +277,7 @@ if (budy.toLowerCase().startsWith('hadir')) {
     if (!daftarAbsen[m.chat]) return; // Tidak ada absen aktif
 
     const nama = budy.slice(6).trim(); // Mengambil teks setelah ".hadir"
-    if (!nama) return m.reply('Ketik: *.hadir Nama Lengkap*');
+    if (!nama) return m.reply('Ketik: *hadir Nama Lengkap*');
 
     const list = daftarAbsen[m.chat];
 
@@ -298,7 +298,7 @@ if (budy.toLowerCase().startsWith('hadir')) {
     m.reply('Terima kasih, absen kamu sudah dicatat.');
 }
 
-if (budy.toLowerCase().startsWith('notabsen')) {
+if (budy.toLowerCase().startsWith('nothadir')) {
     if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
     if (!daftarAbsen[m.chat]) return;
 
