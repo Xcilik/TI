@@ -587,14 +587,14 @@ mentionedJid:[sender]}},
             }
             break;
 
-case 'absen': {
+case 'absensi': {
     if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (daftarAbsen[m.chat]) return m.reply('Absen sedang berlangsung.');
+    if (daftarAbsen[m.chat]) return m.reply('Absensi sedang berlangsung.');
 
     const judul = args.join(' ');
     if (!judul) return m.reply('Contoh: *.absen Pemrograman Web*');
 
-    const text = `*📋 Absen: ${judul}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*`;
+    const text = `*📋 Absen: ${judul}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absensi.\n\n*Daftar Hadir:*`;
     const sentMsg = await XeonBotInc.sendMessage(m.chat, { text });
 
     daftarAbsen[m.chat] = {
