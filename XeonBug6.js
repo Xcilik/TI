@@ -29,6 +29,7 @@ const { PDFDocument } = require('pdf-lib')
 // const Jimp = require('jimp')
 const cv = require('opencv4nodejs-prebuilt-install');
 
+const daftarAbsen = {};
 const daftarAcara = {};
 
 // Format: { chatId: { messageId, title, peserta: [{ id, name }] } }
@@ -585,7 +586,61 @@ mentionedJid:[sender]}},
                 m.reply('List selesai. Terima kasih untuk yang sudah ikut!');
             }
             break;
-                     
+
+case 'absen': {
+    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+    if (daftarAbsen[m.chat]) return m.reply('Absen sedang berlangsung.');
+
+    const judul = args.join(' ');
+    if (!judul) return m.reply('Contoh: *.absen Pemrograman Web*');
+
+    const text = `*📋 Absen: ${judul}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*`;
+    const sentMsg = await XeonBotInc.sendMessage(m.chat, { text });
+
+    daftarAbsen[m.chat] = {
+        key: sentMsg.key,
+        title: judul,
+        peserta: []
+    };
+
+    m.reply('Absen dimulai. Silakan di PIN.');
+}
+break;
+case 'doneabsen': {
+    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+    if (!daftarAbsen[m.chat]) return m.reply('Tidak ada absen yang aktif.');
+
+    delete daftarAbsen[m.chat];
+    m.reply('Absen ditutup. Terima kasih semua!');
+}
+break;
+                
+case 'hadir': {
+    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+    if (!daftarAbsen[m.chat]) return m.reply('Belum ada absen yang dimulai.');
+
+    const nama = args.join(' ');
+    if (!nama) return m.reply('Ketik: *.hadir Nama Lengkap*');
+
+    const list = daftarAbsen[m.chat];
+
+    if (list.peserta.some(p => p.id === m.sender)) {
+        return m.reply('Kamu sudah absen sebelumnya.');
+    }
+
+    list.peserta.push({ id: m.sender, nama });
+
+    const updatedText = `*📋 Absen: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
+        list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n');
+
+    await XeonBotInc.sendMessage(m.chat, {
+        text: updatedText,
+        edit: list.key
+    });
+
+    m.reply('Terima kasih, absen kamu sudah dicatat.');
+}
+break;                
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
