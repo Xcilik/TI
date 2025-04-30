@@ -11,6 +11,7 @@ const ms = toMs = require('ms')
 const axios = require('axios')
 const fetch = require('node-fetch')
 const { createCanvas, loadImage } = require('canvas')
+const YTDlpWrap = require('yt-dlp-wrap').default;
 const pino = require('pino')
 const { exec, spawn, execSync } = require("child_process")
 const { performance } = require('perf_hooks')
@@ -929,103 +930,89 @@ mentionedJid:[sender]}},
             }
             break
             case 'play': {
-                if (!text) return replygcxeon(`Penggunaan: *play* <judul lagu>\nContoh: *play garam dan madu*`)
-                replygcxeon(mess.wait)
+                if (!text) return replygcxeon(`Penggunaan: *play* <judul lagu>\nContoh: *play garam dan madu*`);
+                replygcxeon(mess.wait);
             
                 try {
-                    const searchRes = await fetch(`https://ytgrabber.com/api/search?q=${encodeURIComponent(text)}`)
-                    const searchJson = await searchRes.json()
+                    // Mencari video berdasarkan judul
+                    const ytDlpWrap = new YTDlpWrap();
+                    const searchResult = await ytDlpWrap.execPromise([
+                        'ytsearch:' + text,
+                        '--max-results', '1',
+                        '--dump-json'
+                    ]);
+                    const video = JSON.parse(searchResult).entries[0];
+                    const { title, uploader, duration, thumbnail, url } = video;
             
-                    if (!searchJson || !searchJson.results || searchJson.results.length === 0) {
-                        return replygcxeon('❌ Lagu tidak ditemukan.')
-                    }
+                    // Mengunduh thumbnail
+                    const resImg = await fetch(thumbnail);
+                    const arrayBuffer = await resImg.arrayBuffer();
+                    const img = await loadImage(Buffer.from(arrayBuffer));
             
-                    const video = searchJson.results[0]
-                    const videoId = video.id
-                    const title = video.title
-                    const channel = video.channel
-                    const duration = video.duration
-                    const thumbnailUrl = video.thumbnail
+                    // Membuat canvas untuk thumbnail
+                    const canvas = createCanvas(800, 400);
+                    const ctx = canvas.getContext('2d');
             
-                    const downloadRes = await fetch(`https://ytgrabber.com/api/download?id=${videoId}`)
-                    const downloadJson = await downloadRes.json()
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, '#121212');
+                    gradient.addColorStop(1, '#1f1f1f');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-                    if (!downloadJson || !downloadJson.downloadUrl) {
-                        return replygcxeon('❌ Gagal mendapatkan link unduhan.')
-                    }
+                    ctx.drawImage(img, 40, 80, 240, 240);
             
-                    const audioUrl = downloadJson.downloadUrl
-            
-                    // Gambar thumbnail
-                    const resImg = await fetch(thumbnailUrl)
-                    const arrayBuffer = await resImg.arrayBuffer()
-                    const img = await loadImage(Buffer.from(arrayBuffer))
-            
-                    // Setup canvas
-                    const canvas = createCanvas(800, 400)
-                    const ctx = canvas.getContext('2d')
-            
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 400)
-                    gradient.addColorStop(0, '#121212')
-                    gradient.addColorStop(1, '#1f1f1f')
-                    ctx.fillStyle = gradient
-                    ctx.fillRect(0, 0, canvas.width, canvas.height)
-            
-                    ctx.drawImage(img, 40, 80, 240, 240)
-            
-                    // Judul lagu (multibaris)
-                    ctx.fillStyle = '#ffffff'
-                    ctx.font = 'bold 32px Sans'
-                    const lines = []
-                    const words = title.split(' ')
-                    let line = ''
+                    // Menambahkan teks judul
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 32px Sans';
+                    const lines = [];
+                    const words = title.split(' ');
+                    let line = '';
                     for (let i = 0; i < words.length; i++) {
-                        const testLine = line + words[i] + ' '
-                        const metrics = ctx.measureText(testLine)
+                        const testLine = line + words[i] + ' ';
+                        const metrics = ctx.measureText(testLine);
                         if (metrics.width > 400 && i > 0) {
-                            lines.push(line)
-                            line = words[i] + ' '
+                            lines.push(line);
+                            line = words[i] + ' ';
                         } else {
-                            line = testLine
+                            line = testLine;
                         }
                     }
-                    lines.push(line)
+                    lines.push(line);
                     lines.forEach((l, i) => {
-                        ctx.fillText(l.trim(), 310, 150 + i * 35)
-                    })
+                        ctx.fillText(l.trim(), 310, 150 + i * 35);
+                    });
             
-                    // Channel & durasi
-                    ctx.fillStyle = '#b3b3b3'
-                    ctx.font = '24px Sans'
-                    ctx.fillText(channel, 310, 240)
-                    ctx.fillText(duration, 310, 270)
+                    // Menambahkan informasi uploader dan durasi
+                    ctx.fillStyle = '#b3b3b3';
+                    ctx.font = '24px Sans';
+                    ctx.fillText(uploader, 310, 240);
+                    ctx.fillText(duration, 310, 270);
             
-                    // Progress bar (dummy 150/400)
-                    ctx.fillStyle = '#555'
-                    ctx.fillRect(310, 300, 400, 6)
-                    ctx.fillStyle = '#1db954'
-                    ctx.fillRect(310, 300, 150, 6)
+                    // Menambahkan progress bar
+                    ctx.fillStyle = '#555';
+                    ctx.fillRect(310, 300, 400, 6);
+                    ctx.fillStyle = '#1db954';
+                    ctx.fillRect(310, 300, 150, 6);
             
-                    const buffer = canvas.toBuffer('image/png')
+                    const buffer = canvas.toBuffer('image/png');
             
                     await XeonBotInc.sendMessage(m.chat, {
                         image: buffer,
-                        caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
+                        caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${uploader}\n⏱️ *Durasi:* ${duration}`,
                         footer: 'Pilih format download di bawah ini.',
                         buttons: [
-                            { buttonId: `.ytmp3 ${audioUrl}`, buttonText: { displayText: '🔊 Download MP3' }, type: 1 },
-                            { buttonId: `.ytmp4 ${audioUrl}`, buttonText: { displayText: '🎥 Download MP4' }, type: 1 }
+                            { buttonId: `.ytmp3 ${url}`, buttonText: { displayText: '🔊 Download MP3' }, type: 1 },
+                            { buttonId: `.ytmp4 ${url}`, buttonText: { displayText: '🎥 Download MP4' }, type: 1 }
                         ],
                         headerType: 4
-                    }, { quoted: m })
+                    }, { quoted: m });
             
                 } catch (err) {
-                    console.error(err)
-                    replygcxeon('⚠️ Terjadi kesalahan. Coba lagi nanti.')
+                    console.error(err);
+                    replygcxeon('⚠️ Terjadi kesalahan. Coba lagi nanti.');
                 }
             }
-            break
-
+            break;
                 
             case 'toaud':
             case 'toaudio': {
