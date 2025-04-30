@@ -940,6 +940,7 @@ mentionedJid:[sender]}},
                     const ytDlpWrap = new YTDlpWrap();
                     const searchResult = await ytDlpWrap.execPromise([
                         `ytsearch5:${text}`,
+                        '--cookies', './cookies.txt', // Ganti dengan path ke file cookies Anda                        
                         '--dump-json'
                     ]);
                     const video = JSON.parse(searchResult).entries[0];
