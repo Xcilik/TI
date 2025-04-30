@@ -272,60 +272,60 @@ mentionedJid:[sender]}},
         
         }
 
-if (budy.toLowerCase().startsWith('hadir')) {
-    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (!daftarAbsen[m.chat]) return; // Tidak ada absen aktif
-
-    const nama = budy.slice(6).trim(); // Mengambil teks setelah ".hadir"
-    if (!nama) return m.reply('Ketik: *hadir Nama Lengkap*');
-
-    const list = daftarAbsen[m.chat];
-
-    if (list.peserta.some(p => p.id === m.sender)) {
-        return m.reply('Kamu sudah absen sebelumnya.');
-    }
-
-    list.peserta.push({ id: m.sender, nama });
-
-    const updatedText = `*📋 Absensi: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
-        list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n');
-
-    await XeonBotInc.sendMessage(m.chat, {
-        text: updatedText,
-        edit: list.key
-    });
-
-    m.reply('Terima kasih, absen kamu sudah dicatat.');
-}
-
-if (budy.toLowerCase().startsWith('nothadir')) {
-    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (!daftarAbsen[m.chat]) return;
-
-    const groupMetadata = await XeonBotInc.groupMetadata(m.chat);
-    const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && (p.admin === 'admin' || p.admin === 'superadmin'));
-    if (!isAdmin) return m.reply('Hanya admin yang bisa menghapus peserta absen.');
-
-    const nomor = parseInt(budy.slice(10).trim());
-    if (isNaN(nomor) || nomor < 1) return m.reply('Ketik: *.notabsen {nomor urutan}*');
-
-    const list = daftarAbsen[m.chat];
-    if (nomor > list.peserta.length) return m.reply('Nomor urutan tidak ditemukan.');
-
-    const removed = list.peserta.splice(nomor - 1, 1)[0];
-
-    const updatedText = `*📋 Absensi: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
-        (list.peserta.length > 0
-            ? list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n')
-            : '_Belum ada yang hadir._');
-
-    await XeonBotInc.sendMessage(m.chat, {
-        text: updatedText,
-        edit: list.key
-    });
-
-    m.reply(`Peserta nomor ${nomor} (${removed.nama}) telah dihapus dari absen.`);
-}
+        if (budy.toLowerCase().startsWith('hadir')) {
+            if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+            if (!daftarAbsen[m.chat]) return; // Tidak ada absen aktif
+        
+            const nama = budy.slice(6).trim(); // Mengambil teks setelah ".hadir"
+            if (!nama) return m.reply('Ketik: *hadir Nama Lengkap*');
+        
+            const list = daftarAbsen[m.chat];
+        
+            if (list.peserta.some(p => p.id === m.sender)) {
+                return m.reply('Kamu sudah absen sebelumnya.');
+            }
+        
+            list.peserta.push({ id: m.sender, nama });
+        
+            const updatedText = `*📋 Absensi: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
+                list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n');
+        
+            await XeonBotInc.sendMessage(m.chat, {
+                text: updatedText,
+                edit: list.key
+            });
+        
+            m.reply('Terima kasih, absen kamu sudah dicatat.');
+        }
+        
+        if (budy.toLowerCase().startsWith('nothadir')) {
+            if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+            if (!daftarAbsen[m.chat]) return;
+        
+            const groupMetadata = await XeonBotInc.groupMetadata(m.chat);
+            const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && (p.admin === 'admin' || p.admin === 'superadmin'));
+            if (!isAdmin) return m.reply('Hanya admin yang bisa menghapus peserta absen.');
+        
+            const nomor = parseInt(budy.slice(10).trim());
+            if (isNaN(nomor) || nomor < 1) return m.reply('Ketik: *.notabsen {nomor urutan}*');
+        
+            const list = daftarAbsen[m.chat];
+            if (nomor > list.peserta.length) return m.reply('Nomor urutan tidak ditemukan.');
+        
+            const removed = list.peserta.splice(nomor - 1, 1)[0];
+        
+            const updatedText = `*📋 Absensi: ${list.title}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absen.\n\n*Daftar Hadir:*\n` +
+                (list.peserta.length > 0
+                    ? list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n')
+                    : '_Belum ada yang hadir._');
+        
+            await XeonBotInc.sendMessage(m.chat, {
+                text: updatedText,
+                edit: list.key
+            });
+        
+            m.reply(`Peserta nomor ${nomor} (${removed.nama}) telah dihapus dari absen.`);
+        }
         
         if (budy.toLowerCase().trim() === 'ikut') {
             if (!daftarAcara[m.chat]) return; // Tidak ada acara aktif
@@ -642,25 +642,25 @@ if (budy.toLowerCase().startsWith('nothadir')) {
             }
             break;
 
-case 'buatabsen': {
-    if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
-    if (daftarAbsen[m.chat]) return m.reply('(Absensi) sedang berlangsung.');
-
-    const judul = args.join(' ');
-    if (!judul) return m.reply('Contoh: *.absen Pemrograman Web*');
-
-    const text = `*📋 Absen: ${judul}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absensi.\n\n*Daftar Hadir:*`;
-    const sentMsg = await XeonBotInc.sendMessage(m.chat, { text });
-
-    daftarAbsen[m.chat] = {
-        key: sentMsg.key,
-        title: judul,
-        peserta: []
-    };
-
-    m.reply('(Absensi) dimulai. Silakan di PIN.');
-}
-break;         
+            case 'buatabsen': {
+                if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+                if (daftarAbsen[m.chat]) return m.reply('(Absensi) sedang berlangsung.');
+            
+                const judul = args.join(' ');
+                if (!judul) return m.reply('Contoh: *.absen Pemrograman Web*');
+            
+                const text = `*📋 Absen: ${judul}*\n\nKetik *.hadir {nama lengkap}* untuk mengisi absensi.\n\n*Daftar Hadir:*`;
+                const sentMsg = await XeonBotInc.sendMessage(m.chat, { text });
+            
+                daftarAbsen[m.chat] = {
+                    key: sentMsg.key,
+                    title: judul,
+                    peserta: []
+                };
+            
+                m.reply('(Absensi) dimulai. Silakan di PIN.');
+            }
+            break;         
             case 'addmember':
                 if (!m.isGroup) return replygcxeon(mess.group);
                 if (!isAdmins && !isGroupOwner && !isCreator) return replygcxeon(mess.admin);
