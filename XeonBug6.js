@@ -939,7 +939,7 @@ mentionedJid:[sender]}},
                     // Mencari video berdasarkan judul
                     const ytDlpWrap = new YTDlpWrap();
                     const searchResult = await ytDlpWrap.execPromise([
-                        `ytsearch5:${text}`,
+                        `ytsearch:${text}`,
                         '--cookies', './cookies.txt', // Ganti dengan path ke file cookies Anda                        
                         '--dump-json'
                     ]);
