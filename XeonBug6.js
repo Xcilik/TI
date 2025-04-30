@@ -929,6 +929,8 @@ mentionedJid:[sender]}},
 
             }
             break
+ 
+
             case 'play': {
                 if (!text) return replygcxeon(`Penggunaan: *play* <judul lagu>\nContoh: *play garam dan madu*`);
                 replygcxeon(mess.wait);
@@ -937,8 +939,7 @@ mentionedJid:[sender]}},
                     // Mencari video berdasarkan judul
                     const ytDlpWrap = new YTDlpWrap();
                     const searchResult = await ytDlpWrap.execPromise([
-                        'ytsearch:' + text,
-                        '--max-results', '1',
+                        `ytsearch5:${text}`,
                         '--dump-json'
                     ]);
                     const video = JSON.parse(searchResult).entries[0];
@@ -1013,6 +1014,7 @@ mentionedJid:[sender]}},
                 }
             }
             break;
+
                 
             case 'toaud':
             case 'toaudio': {
