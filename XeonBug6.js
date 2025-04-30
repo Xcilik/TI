@@ -326,6 +326,27 @@ mentionedJid:[sender]}},
         
             m.reply(`Peserta nomor ${nomor} (${removed.nama}) telah dihapus dari absen.`);
         }
+        if (budy.toLowerCase().startsWith('.doneabsen')) {
+            if (!isGroup) return m.reply('Fitur ini hanya bisa digunakan di grup.');
+            if (!daftarAbsen[m.chat]) return m.reply('Tidak ada absen yang aktif.');
+        
+            const groupMetadata = await XeonBotInc.groupMetadata(m.chat);
+            const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && (p.admin === 'admin' || p.admin === 'superadmin'));
+            if (!isAdmin) return m.reply('Hanya admin yang bisa mengakhiri absen.');
+        
+            const list = daftarAbsen[m.chat];
+        
+            // Kirim rekap absen sebelum dihapus
+            const recapText = `✅ *Absen Selesai: ${list.title}*\n\n*Total Hadir:* ${list.peserta.length}\n\n*Daftar Hadir:*\n` +
+                (list.peserta.length > 0
+                    ? list.peserta.map((p, i) => `${i + 1}. ${p.nama}`).join('\n')
+                    : '_Tidak ada yang hadir._');
+        
+            await XeonBotInc.sendMessage(m.chat, { text: recapText });
+        
+            delete daftarAbsen[m.chat];
+            m.reply('Absen ditutup. Terima kasih!');
+        }
         
         if (budy.toLowerCase().trim() === 'ikut') {
             if (!daftarAcara[m.chat]) return; // Tidak ada acara aktif
