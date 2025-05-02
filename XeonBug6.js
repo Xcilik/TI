@@ -11,7 +11,6 @@ const ms = toMs = require('ms')
 const axios = require('axios')
 const fetch = require('node-fetch')
 const { createCanvas, loadImage } = require('canvas')
-const YTDlpWrap = require('yt-dlp-wrap').default;
 const pino = require('pino')
 const { exec, spawn, execSync } = require("child_process")
 const { performance } = require('perf_hooks')
