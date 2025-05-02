@@ -957,7 +957,6 @@ case 'play': {
 
         ctx.drawImage(img, 40, 80, 240, 240)
 
-        // Judul lagu
         ctx.fillStyle = '#ffffff'
         ctx.font = 'bold 32px Sans'
         const lines = []
@@ -990,15 +989,27 @@ case 'play': {
 
         const buffer = canvas.toBuffer()
 
-        // ✅ Kirim gambar + tombol dalam 1x kirim (FIX FORMAT BAILEYS 6.7.5)
+        // ✅ Kirim gambar dulu
         await XeonBotInc.sendMessage(m.chat, {
             image: buffer,
-            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
-            templateButtons: [
-                { quickReplyButton: { displayText: '🔊 Download MP3', id: `.ytmp3 ${link}` } },
-                { quickReplyButton: { displayText: '🎥 Download MP4', id: `.ytmp4 ${link}` } }
-            ],
-            footer: 'Downloader Musik XeonBot'
+            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`
+        }, { quoted: m })
+
+        // ✅ Kirim List Message (pilih format)
+        await XeonBotInc.sendMessage(m.chat, {
+            text: 'Pilih format download di bawah ini:',
+            footer: 'Downloader Musik XeonBot',
+            title: 'Pilih Format',
+            buttonText: 'Klik di sini untuk pilih',
+            sections: [
+                {
+                    title: "Pilihan Download",
+                    rows: [
+                        { title: "🔊 Download MP3 (Audio)", rowId: `.ytmp3 ${link}` },
+                        { title: "🎥 Download MP4 (Video)", rowId: `.ytmp4 ${link}` }
+                    ]
+                }
+            ]
         }, { quoted: m })
 
     } catch (err) {
