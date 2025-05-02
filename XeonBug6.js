@@ -930,22 +930,20 @@ mentionedJid:[sender]}},
             break
  
 case 'play': {
-    if (!text) return replygcxeon(`Penggunaan: *play* <judul lagu>\nContoh: *play garam dan madu*`)
+    if (!text) return replygcxeon(`Masukkan judul lagu!\nContoh: *.play senja bersemi*`)
     replygcxeon(mess.wait)
     try {
         const res = await fetch(`https://api.nekorinn.my.id/downloader/ytplay-savetube?q=${encodeURIComponent(text)}`)
         const json = await res.json()
 
-        if (!json.result || !json.result.downloadUrl) return replygcxeon('Lagu tidak ditemukan atau API bermasalah.')
+        if (!json?.result) return replygcxeon('Gagal mengambil data.')
 
         const { title, channel, duration, imageUrl, link } = json.result.metadata
+        const audio = json.result.downloadUrl
 
-        // Gambar thumbnail
         const resImg = await fetch(imageUrl)
-        const arrayBuffer = await resImg.arrayBuffer()
-        const img = await loadImage(Buffer.from(arrayBuffer))
+        const img = await loadImage(Buffer.from(await resImg.arrayBuffer()))
 
-        // Setup canvas
         const canvas = createCanvas(800, 400)
         const ctx = canvas.getContext('2d')
 
@@ -987,29 +985,35 @@ case 'play': {
         ctx.fillStyle = '#1db954'
         ctx.fillRect(310, 300, 150, 6)
 
-        const buffer = canvas.toBuffer()
+        const buffer = canvas.toBuffer('image/png')
 
-        // ✅ Kirim gambar dulu
         await XeonBotInc.sendMessage(m.chat, {
             image: buffer,
-            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`
-        }, { quoted: m })
-
-        // ✅ Kirim List Message (pilih format)
-        await XeonBotInc.sendMessage(m.chat, {
-            text: 'Pilih format download di bawah ini:',
-            footer: 'Downloader Musik XeonBot',
-            title: 'Pilih Format',
-            buttonText: 'Klik di sini untuk pilih',
-            sections: [
-                {
-                    title: "Pilihan Download",
-                    rows: [
-                        { title: "🔊 Download MP3 (Audio)", rowId: `.ytmp3 ${link}` },
-                        { title: "🎥 Download MP4 (Video)", rowId: `.ytmp4 ${link}` }
-                    ]
-                }
-            ]
+            caption: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
+            contextInfo: {
+                externalAdReply: {
+                    title: title,
+                    body: `${channel} • ${duration}`,
+                    thumbnailUrl: imageUrl,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    sourceUrl: link
+                },
+                businessMessageForwardInfo: {
+                    businessOwnerJid: XeonBotInc.decodeJid(XeonBotInc.user.id)
+                },
+                forwardedNewsletterMessageInfo: {
+                    newsletterName: "Downloader Musik",
+                    newsletterJid: "120363021165151765@newsletter"
+                },
+                forwardingScore: 9999,
+                isForwarded: true
+            },
+            buttons: [
+                { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3' }, type: 1 },
+                { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4' }, type: 1 }
+            ],
+            headerType: 4
         }, { quoted: m })
 
     } catch (err) {
@@ -1017,8 +1021,7 @@ case 'play': {
         replygcxeon('Terjadi kesalahan. Coba lagi nanti.')
     }
 }
-break
-            case 'toaud':
+break       case 'toaud':
             case 'toaudio': {
                 if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *toaudio* balas ke pesan video.`)
                 replygcxeon(mess.wait)
