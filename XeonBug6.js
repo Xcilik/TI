@@ -939,7 +939,6 @@ case 'play': {
         if (!json.result || !json.result.downloadUrl) return replygcxeon('Lagu tidak ditemukan atau API bermasalah.')
 
         const { title, channel, duration, imageUrl, link } = json.result.metadata
-        const audio = json.result.downloadUrl
 
         // Gambar thumbnail
         const resImg = await fetch(imageUrl)
@@ -985,34 +984,41 @@ case 'play': {
         ctx.fillText(channel, 310, 240)
         ctx.fillText(duration, 310, 270)
 
-        // Progress bar (dummy 150/400)
+        // Progress bar
         ctx.fillStyle = '#555'
         ctx.fillRect(310, 300, 400, 6)
         ctx.fillStyle = '#1db954'
         ctx.fillRect(310, 300, 150, 6)
 
-        const buffer = canvas.toBuffer('image/png')
+        const buffer = canvas.toBuffer()
 
         await XeonBotInc.sendMessage(m.chat, {
             image: buffer,
-            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
-            contextInfo: {
-                externalAdReply: {
-                    title,
-                    body: `${channel} • ${duration}`,
-                    thumbnailUrl: imageUrl,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                    sourceUrl: link
-                },
-                forwardingScore: 9999,
-                isForwarded: true
-            },
-            buttons: [
-                { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: '🔊 Download MP3' }, type: 1 },
-                { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: '🎥 Download MP4' }, type: 1 }
-            ],
-            headerType: 4
+            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`
+        }, { quoted: m })
+
+        // Kirim ulang dengan hydrated button
+        await XeonBotInc.sendMessage(m.chat, {
+            templateMessage: {
+                hydratedTemplate: {
+                    hydratedContentText: `Pilih format download di bawah ini:`,
+                    hydratedFooterText: 'Downloader Musik XeonBot',
+                    hydratedButtons: [
+                        {
+                            quickReplyButton: {
+                                displayText: '🔊 Download MP3',
+                                id: `.ytmp3 ${link}`
+                            }
+                        },
+                        {
+                            quickReplyButton: {
+                                displayText: '🎥 Download MP4',
+                                id: `.ytmp4 ${link}`
+                            }
+                        }
+                    ]
+                }
+            }
         }, { quoted: m })
 
     } catch (err) {
@@ -1020,8 +1026,7 @@ case 'play': {
         replygcxeon('Terjadi kesalahan. Coba lagi nanti.')
     }
 }
-break
-                
+break                
             case 'toaud':
             case 'toaudio': {
                 if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *toaudio* balas ke pesan video.`)
