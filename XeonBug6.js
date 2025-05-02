@@ -957,7 +957,7 @@ case 'play': {
 
         ctx.drawImage(img, 40, 80, 240, 240)
 
-        // Judul lagu (multibaris)
+        // Judul lagu
         ctx.fillStyle = '#ffffff'
         ctx.font = 'bold 32px Sans'
         const lines = []
@@ -978,13 +978,11 @@ case 'play': {
             ctx.fillText(l.trim(), 310, 150 + i * 35)
         })
 
-        // Channel & durasi
         ctx.fillStyle = '#b3b3b3'
         ctx.font = '24px Sans'
         ctx.fillText(channel, 310, 240)
         ctx.fillText(duration, 310, 270)
 
-        // Progress bar
         ctx.fillStyle = '#555'
         ctx.fillRect(310, 300, 400, 6)
         ctx.fillStyle = '#1db954'
@@ -992,31 +990,15 @@ case 'play': {
 
         const buffer = canvas.toBuffer()
 
+        // ✅ Kirim gambar + tombol dalam 1x kirim (FIX FORMAT BAILEYS 6.7.5)
         await XeonBotInc.sendMessage(m.chat, {
             image: buffer,
             caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
-        }, { quoted: m })
-
-        // Kirim tombol
-        await XeonBotInc.sendMessage(m.chat, {
-            templateButtonsMessage: {
-                hydratedContentText: `Pilih format download di bawah ini:`,
-                hydratedFooterText: 'Downloader Musik XeonBot',
-                hydratedButtons: [
-                    {
-                        quickReplyButton: {
-                            displayText: '🔊 Download MP3',
-                            id: `.ytmp3 ${link}`
-                        }
-                    },
-                    {
-                        quickReplyButton: {
-                            displayText: '🎥 Download MP4',
-                            id: `.ytmp4 ${link}`
-                        }
-                    }
-                ]
-            }
+            templateButtons: [
+                { quickReplyButton: { displayText: '🔊 Download MP3', id: `.ytmp3 ${link}` } },
+                { quickReplyButton: { displayText: '🎥 Download MP4', id: `.ytmp4 ${link}` } }
+            ],
+            footer: 'Downloader Musik XeonBot'
         }, { quoted: m })
 
     } catch (err) {
