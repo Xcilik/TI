@@ -1022,6 +1022,49 @@ mentionedJid:[sender]}},
                 }
             }
             break
+            case 'ytmp3': {
+                if (!text) return replygcxeon(`Penggunaan: *${prefix}ytmp3* <link YouTube>`)
+                replygcxeon(mess.wait)
+                try {
+                    let res = await fetch(`https://fastrestapis.fasturl.cloud/downup/ytmp3?quality=128kbps&server=auto&url=${encodeURIComponent(text)}`)
+                    let data = await res.json()
+                    if (!data?.result?.media) return replygcxeon('Gagal mengambil link MP3.')
+            
+                    await XeonBotInc.sendMessage(m.chat, {
+                        audio: { url: data.result.media },
+                        mimetype: 'audio/mpeg',
+                        fileName: `${data.result.title || 'audio'}.mp3`
+                    }, { quoted: m })
+            
+                } catch (e) {
+                    console.log(e)
+                    replygcxeon('❌ Terjadi kesalahan saat mengunduh MP3.')
+                }
+            }
+            break
+            
+            case 'ytmp4': {
+                if (!text) return replygcxeon(`Penggunaan: *${prefix}ytmp4* <link YouTube>`)
+                replygcxeon(mess.wait)
+                try {
+                    let res = await fetch(`https://velyn.biz.id/api/downloader/ytmp4?url=${encodeURIComponent(text)}`)
+                    let data = await res.json()
+            
+                    if (!data.status || !data.data?.status || !data.data?.url)
+                        return replygcxeon('Gagal mengambil link MP4.')
+            
+                    await XeonBotInc.sendMessage(m.chat, {
+                        video: { url: data.data.url },
+                        mimetype: 'video/mp4',
+                        fileName: `${data.data.title || 'video'}.mp4`
+                    }, { quoted: m })
+            
+                } catch (e) {
+                    console.log(e)
+                    replygcxeon('❌ Terjadi kesalahan saat mengunduh MP4.')
+                }
+            }
+            break
 
             case 'toaud':
             case 'toaudio': {
