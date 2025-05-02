@@ -994,13 +994,29 @@ case 'play': {
 
         await XeonBotInc.sendMessage(m.chat, {
             image: buffer,
-            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}\n\nPilih format download di bawah ini.`,
-            footer: 'Downloader Musik XeonBot',
-            buttons: [
-                { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: '🔊 Download MP3' }, type: 1 },
-                { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: '🎥 Download MP4' }, type: 1 }
-            ],
-            headerType: 4
+            caption: `📌 *YouTube Play*\n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
+        }, { quoted: m })
+
+        // Kirim tombol
+        await XeonBotInc.sendMessage(m.chat, {
+            templateButtonsMessage: {
+                hydratedContentText: `Pilih format download di bawah ini:`,
+                hydratedFooterText: 'Downloader Musik XeonBot',
+                hydratedButtons: [
+                    {
+                        quickReplyButton: {
+                            displayText: '🔊 Download MP3',
+                            id: `.ytmp3 ${link}`
+                        }
+                    },
+                    {
+                        quickReplyButton: {
+                            displayText: '🎥 Download MP4',
+                            id: `.ytmp4 ${link}`
+                        }
+                    }
+                ]
+            }
         }, { quoted: m })
 
     } catch (err) {
