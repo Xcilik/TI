@@ -986,14 +986,22 @@ mentionedJid:[sender]}},
                     ctx.fillRect(310, 300, 150, 6)
             
                     const buffer = canvas.toBuffer('image/png')
+// Kirim gambar dengan caption saja
                     await XeonBotInc.sendMessage(m.chat, {
-                      text: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
+                      image: buffer,
+                      caption: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`
+                    }, { quoted: m })
+                    
+                    // Kirim tombol setelah gambar
+                    await XeonBotInc.sendMessage(m.chat, {
+                      text: 'Pilih format download:',
                       buttons: [
-                        { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3' }, type: 1 },
-                        { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4' }, type: 1 }
+                        { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3 🎵' }, type: 1 },
+                        { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4 🎬' }, type: 1 }
                       ],
                       headerType: 1
                     }, { quoted: m })
+
 
             
                 } catch (e) {
