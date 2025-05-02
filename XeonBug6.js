@@ -1021,7 +1021,8 @@ case 'play': {
         replygcxeon('Terjadi kesalahan. Coba lagi nanti.')
     }
 }
-break       case 'toaud':
+break
+            case 'toaud':
             case 'toaudio': {
                 if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Penggunaan: *toaudio* balas ke pesan video.`)
                 replygcxeon(mess.wait)
