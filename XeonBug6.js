@@ -986,35 +986,15 @@ mentionedJid:[sender]}},
                     ctx.fillRect(310, 300, 150, 6)
             
                     const buffer = canvas.toBuffer('image/png')
-            
                     await XeonBotInc.sendMessage(m.chat, {
-                        image: buffer,
-                        caption: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
-                        contextInfo: {
-                            externalAdReply: {
-                                title: title,
-                                body: `${channel} • ${duration}`,
-                                thumbnailUrl: imageUrl,
-                                mediaType: 1,
-                                renderLargerThumbnail: true,
-                                sourceUrl: link
-                            },
-                            businessMessageForwardInfo: {
-                                businessOwnerJid: XeonBotInc.decodeJid(XeonBotInc.user.id)
-                            },
-                            forwardedNewsletterMessageInfo: {
-                                newsletterName: "Downloader Musik",
-                                newsletterJid: "120363021165151765@newsletter"
-                            },
-                            forwardingScore: 9999,
-                            isForwarded: true
-                        },
-                        buttons: [
-                            { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3' }, type: 1 },
-                            { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4' }, type: 1 }
-                        ],
-                        headerType: 4
+                      text: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
+                      buttons: [
+                        { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3' }, type: 1 },
+                        { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4' }, type: 1 }
+                      ],
+                      headerType: 1
                     }, { quoted: m })
+
             
                 } catch (e) {
                     console.error(e)
