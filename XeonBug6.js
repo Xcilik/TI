@@ -947,10 +947,11 @@ case 'play': {
             image: imgBuffer,
             caption: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
             footer: "© XeonBotInc",
-            templateButtons: [
-                { index: 1, quickReplyButton: { displayText: "🎵 Download MP3", id: `.ytmp3 ${link}` } },
-                { index: 2, quickReplyButton: { displayText: "🎥 Download MP4", id: `.ytmp4 ${link}` } }
-            ]
+            buttons: [
+                { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: "🎵 Download MP3" }, type: 1 },
+                { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: "🎥 Download MP4" }, type: 1 }
+            ],
+            headerType: 4
         }, { quoted: m })
 
     } catch (e) {
