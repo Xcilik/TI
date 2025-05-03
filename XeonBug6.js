@@ -986,40 +986,14 @@ mentionedJid:[sender]}},
                     ctx.fillRect(310, 300, 150, 6)
             
                     const buffer = canvas.toBuffer('image/png')
-// Kirim gambar dengan caption saja
                     await XeonBotInc.sendMessage(m.chat, {
-                          title: '🎵 YouTube Play',
-                          text: `📌 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
-                          footer: 'Silakan pilih format yang ingin diunduh:',
-                          buttonText: 'Pilih Format Unduhan',
-                          sections: [
-                            {
-                              title: 'Format Audio/Video',
-                              rows: [
-                                {
-                                  title: 'Download MP3 🎵',
-                                  description: 'Unduh audio dari video ini.',
-                                  rowId: `.ytmp3 ${link}`
-                                },
-                                {
-                                  title: 'Download MP4 🎬',
-                                  description: 'Unduh video dengan resolusi terbaik.',
-                                  rowId: `.ytmp4 ${link}`
-                                }
-                              ]
-                            }
-                          ]
-                        }, { quoted: m })
-                    // Kirim tombol setelah gambar
-                    await XeonBotInc.sendMessage(m.chat, {
-                      text: 'Pilih format download:',
+                      text: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
                       buttons: [
-                        { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3 🎵' }, type: 1 },
-                        { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4 🎬' }, type: 1 }
+                        { buttonId: `.ytmp3 ${link}`, buttonText: { displayText: 'Download MP3' }, type: 1 },
+                        { buttonId: `.ytmp4 ${link}`, buttonText: { displayText: 'Download MP4' }, type: 1 }
                       ],
                       headerType: 1
                     }, { quoted: m })
-
 
             
                 } catch (e) {
