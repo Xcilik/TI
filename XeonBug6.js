@@ -940,76 +940,17 @@ case 'play': {
         if (!json?.result) return replygcxeon('Gagal mengambil data.')
 
         const { title, channel, duration, imageUrl, link } = json.result.metadata
-        const audio = json.result.downloadUrl
         const resImg = await fetch(imageUrl)
-        const img = await loadImage(Buffer.from(await resImg.arrayBuffer()))
-
-        const canvas = createCanvas(800, 400)
-        const ctx = canvas.getContext('2d')
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400)
-        gradient.addColorStop(0, '#121212')
-        gradient.addColorStop(1, '#1f1f1f')
-        ctx.fillStyle = gradient
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-        ctx.drawImage(img, 40, 80, 240, 240)
-
-        ctx.fillStyle = '#ffffff'
-        ctx.font = 'bold 32px Sans'
-        const lines = []
-        const words = title.split(' ')
-        let line = ''
-        for (let i = 0; i < words.length; i++) {
-            const testLine = line + words[i] + ' '
-            const metrics = ctx.measureText(testLine)
-            if (metrics.width > 400 && i > 0) {
-                lines.push(line)
-                line = words[i] + ' '
-            } else {
-                line = testLine
-            }
-        }
-        lines.push(line)
-        lines.forEach((l, i) => {
-            ctx.fillText(l.trim(), 310, 150 + i * 35)
-        })
-
-        ctx.fillStyle = '#b3b3b3'
-        ctx.font = '24px Sans'
-        ctx.fillText(channel, 310, 240)
-        ctx.fillText(duration, 310, 270)
-
-        ctx.fillStyle = '#555'
-        ctx.fillRect(310, 300, 400, 6)
-        ctx.fillStyle = '#1db954'
-        ctx.fillRect(310, 300, 150, 6)
-
-        const buffer = canvas.toBuffer('image/png')
-        const media = await XeonBotInc.sendMessage(m.chat, { image: buffer }, { quoted: m })
+        const imgBuffer = Buffer.from(await resImg.arrayBuffer())
 
         await XeonBotInc.sendMessage(m.chat, {
-            image: buffer,
+            image: imgBuffer,
             caption: `📌 *YouTube Play* \n\n🎵 *Judul:* ${title}\n🎤 *Channel:* ${channel}\n⏱️ *Durasi:* ${duration}`,
             footer: "© XeonBotInc",
-            buttons: [
-                {
-                    buttonId: `.ytmp3 ${link}`,
-                    buttonText: {
-                        displayText: 'Download MP3'
-                    },
-                    type: 1
-                },
-                {
-                    buttonId: `.ytmp4 ${link}`,
-                    buttonText: {
-                        displayText: 'Download MP4'
-                    },
-                    type: 1
-                }
-            ],
-            headerType: 4, // untuk image header
-            viewOnce: true
+            templateButtons: [
+                { index: 1, quickReplyButton: { displayText: "🎵 Download MP3", id: `.ytmp3 ${link}` } },
+                { index: 2, quickReplyButton: { displayText: "🎥 Download MP4", id: `.ytmp4 ${link}` } }
+            ]
         }, { quoted: m })
 
     } catch (e) {
